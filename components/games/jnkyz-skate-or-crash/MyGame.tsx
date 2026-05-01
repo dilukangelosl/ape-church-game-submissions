@@ -424,7 +424,6 @@ const MyGameComponent: React.FC<MyGameComponentProps> = ({ game }) => {
                     isGamePaused={false}
                     resultModalDelayMs={800}
                     onSfxMutedChange={setSfxMuted}
-                    musicVolumeMultiplier={musicVolumeMultiplier}
                 >
                     <MyGameWindow
                         game={game}
