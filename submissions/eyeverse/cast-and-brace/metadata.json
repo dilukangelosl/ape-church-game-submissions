@@ -1,0 +1,32 @@
+{
+  "team": "eyeverse",
+  "gameName": "cast-and-brace",
+  "displayTitle": "Cast & Brace",
+  "description": "Player vs house fishing in the emerald depths. Cast your line and let the chain decide your catch.",
+  "authors": [
+    {
+      "name": "Matty",
+      "email": "matty@eyelabs.xyz",
+      "telegram": "EyeMatty"
+    }
+  ],
+  "revenueShare": [
+    {
+      "name": "Eyeverse",
+      "telegram": "EyeMatty",
+      "address": "0xd9Ef01fc57540a1658327ccf6028Ff541f40E288",
+      "share": 100
+    }
+  ],
+  "status": "pending",
+  "category": "arcade",
+  "tags": ["arcade", "fishing", "pvp-house"],
+  "thumbnail": "/cast-and-brace/card.png",
+  "banner": "/cast-and-brace/banner.png",
+  "mainComponent": "MyGame.tsx",
+  "windowComponent": "MyGameWindow.tsx",
+  "setupComponent": "MyGameSetupCard.tsx",
+  "configFile": "myGameConfig.ts",
+  "version": "1.1.0",
+  "submittedAt": "2026-04-09"
+}
