@@ -30,7 +30,7 @@ import { toast } from "sonner";
 import "./my-game.styles.css";
 
 interface MyGameComponentProps {
-  game: Game;
+  game?: Game;
 }
 
 const MyGameComponent: React.FC<MyGameComponentProps> = ({ game }) => {
