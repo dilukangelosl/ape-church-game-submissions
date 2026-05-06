@@ -19,10 +19,7 @@ import {
     getMinesMultiplier,
     getSafeTileCount,
 } from "./minesConfig";
-
-interface MinesProps {
-    game: Game;
-}
+import { myGame } from "../minefield-path/myGameConfig";
 
 interface MinesRoundState {
     minePositions: number[];
@@ -76,7 +73,9 @@ const toSafePositiveInt = (value: number, fallback = 1, maxValue = Number.POSITI
     return Math.min(maxValue, Math.max(1, Math.floor(value)));
 };
 
-const Mines: React.FC<MinesProps> = ({ game }) => {
+const Mines: React.FC = () => {
+    const game = myGame;
+    
     const searchParams = useSearchParams();
     const replayId = searchParams.get("id");
 
