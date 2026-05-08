@@ -1,0 +1,35 @@
+{
+  "team": "jnkyz",
+  "gameName": "jnkyz-skate-or-crash",
+  "displayTitle": "Skate or Crash",
+  "description": "A crash game where Wade skates while the multiplier climbs. Cash out before the fall to lock in profit.",
+  "authors": [
+    {
+      "name": "JNKYZ",
+      "telegram": "jnkyz"
+    }
+  ],
+  "revenueShare": [
+    {
+      "name": "JNKYZ",
+      "telegram": "@abyss_shadows",
+      "address": "0x1Cf0F66B4169146dF84f39203e3C126373A5D47e",
+      "share": 100
+    }
+  ],
+  "status": "pending",
+  "category": "arcade",
+  "tags": [
+    "arcade",
+    "crash",
+    "skate"
+  ],
+  "thumbnail": "/jnkyz-skate-or-crash/card.png",
+  "banner": "/jnkyz-skate-or-crash/banner.png",
+  "mainComponent": "MyGame.tsx",
+  "windowComponent": "MyGameWindow.tsx",
+  "setupComponent": "MyGameSetupCard.tsx",
+  "configFile": "myGameConfig.ts",
+  "version": "1.0.0",
+  "submittedAt": "2026-05-01"
+}
