@@ -34,6 +34,7 @@ type GameWindowProps = {
     onSfxMutedChange?: (muted: boolean) => void;
 
     resultModalDelayMs?: number;
+    startMinimizedResults?: boolean;
 };
 
 const fallbackSong = "/shared/audio/song.mp3";
@@ -63,6 +64,7 @@ const GameWindow: React.FC<GameWindowProps> = ({
     onSfxMutedChange,
 
     resultModalDelayMs = 0,
+    startMinimizedResults = false,
 }) => {
     const audioRef = useRef<Howl | null>(null);
     const [muteMusic, setMuteMusic] = useState(false);
@@ -170,6 +172,7 @@ const GameWindow: React.FC<GameWindowProps> = ({
                         showPlayAgainOption={!inReplayMode && isUserOriginalPlayer}
                         showRewatchOption={inReplayMode || isUserOriginalPlayer}
                         showPNL={showPNL}
+                        startMinimizedResults={startMinimizedResults}
                     />
                 )}
 

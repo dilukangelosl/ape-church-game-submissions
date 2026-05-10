@@ -22,6 +22,7 @@ type GameResultsModalProps = {
     showRewatchOption: boolean;
     showPlayAgainOption: boolean;
     showPNL: boolean;
+    startMinimizedResults?: boolean;
     resetButtonText?: string;
     playAgainButtonText?: string;
     rewatchButtonText?: string;
@@ -42,11 +43,12 @@ const GameResultsModal: React.FC<GameResultsModalProps> = ({
     showRewatchOption,
     showPlayAgainOption,
     showPNL,
+    startMinimizedResults = false,
     resetButtonText = "Change Bet",
     playAgainButtonText = "Play Again",
     rewatchButtonText = "Rewatch",
 }) => {
-    const [minimizeResultsModal, setMinimizeResultsModal] = useState(false);
+    const [minimizeResultsModal, setMinimizeResultsModal] = useState(startMinimizedResults);
     const [hasAnimatedIn, setHasAnimatedIn] = useState(false);
 
     // Draggable minimized modal state
@@ -85,10 +87,9 @@ const GameResultsModal: React.FC<GameResultsModalProps> = ({
     useEffect(() => {
         if (isOpen && !hasAnimatedIn) {
             setHasAnimatedIn(true);
-            // Don't force setMinimizeResultsModal(false) - respect the user's preference
-            // If they minimized it before, it should stay minimized for subsequent games
+            setMinimizeResultsModal(startMinimizedResults);
         }
-    }, [isOpen, hasAnimatedIn]);
+    }, [isOpen, hasAnimatedIn, startMinimizedResults]);
 
     // Reset animation state when modal closes
     useEffect(() => {
