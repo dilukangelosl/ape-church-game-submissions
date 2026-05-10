@@ -8,6 +8,7 @@ import { X, Maximize2, Minimize2 } from "lucide-react";
 
 type GameResultsModalProps = {
     isOpen: boolean;
+    startMinimized?: boolean;
     onClose?: () => void;
     payout: number;
     betAmount: number;
@@ -29,6 +30,7 @@ type GameResultsModalProps = {
 
 const GameResultsModal: React.FC<GameResultsModalProps> = ({
     isOpen,
+    startMinimized = false,
     onClose,
     payout,
     betAmount,
@@ -85,10 +87,9 @@ const GameResultsModal: React.FC<GameResultsModalProps> = ({
     useEffect(() => {
         if (isOpen && !hasAnimatedIn) {
             setHasAnimatedIn(true);
-            // Don't force setMinimizeResultsModal(false) - respect the user's preference
-            // If they minimized it before, it should stay minimized for subsequent games
+            setMinimizeResultsModal(startMinimized);
         }
-    }, [isOpen, hasAnimatedIn]);
+    }, [isOpen, hasAnimatedIn, startMinimized]);
 
     // Reset animation state when modal closes
     useEffect(() => {

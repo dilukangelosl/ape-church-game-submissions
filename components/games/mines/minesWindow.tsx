@@ -364,3 +364,4 @@ const MinesWindow: React.FC<MinesWindowProps> = ({
 };
 
 export default MinesWindow;
+

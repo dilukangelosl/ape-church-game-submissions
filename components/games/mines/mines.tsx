@@ -685,6 +685,11 @@ const Mines: React.FC<MinesProps> = ({ game }) => {
             setPendingManualRevealTiles((prev) => prev.filter((tileIndex) => tileIndex !== index));
 
             if (allSafeRevealed) {
+                if (!isSfxMuted && cashoutSfxRef.current) {
+                    cashoutSfxRef.current.currentTime = 0;
+                    void cashoutSfxRef.current.play().catch(() => {});
+                }
+
                 const amount = Number(Math.min(betAmount * nextMultiplier, maxPayoutPerGame).toFixed(2));
                 resolveTimeoutRef.current = setTimeout(() => {
                     finishRound(amount, `All gems found! Cashed out at ${nextMultiplier.toFixed(2)}x.`);
@@ -1138,6 +1143,12 @@ const Mines: React.FC<MinesProps> = ({ game }) => {
                 showPNL={modalShowPnl}
                 isGamePaused={false}
                 resultModalDelayMs={betMode === "auto" ? 0 : 250}
+                startMinimizedResults={
+                    !forceExpandedReplayEndCard && (
+                        (betMode === "auto" && remainingAutoBets > 0) ||
+                        (betMode === "manual" && manualRoundsRemaining > 0)
+                    )
+                }
                 disableBuiltInSong
                 onMusicMutedChange={setIsMusicMuted}
                 onSfxMutedChange={setIsSfxMuted}
