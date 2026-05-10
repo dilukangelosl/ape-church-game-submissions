@@ -1143,12 +1143,6 @@ const Mines: React.FC<MinesProps> = ({ game }) => {
                 showPNL={modalShowPnl}
                 isGamePaused={false}
                 resultModalDelayMs={betMode === "auto" ? 0 : 250}
-                startMinimizedResults={
-                    !forceExpandedReplayEndCard && (
-                        (betMode === "auto" && remainingAutoBets > 0) ||
-                        (betMode === "manual" && manualRoundsRemaining > 0)
-                    )
-                }
                 disableBuiltInSong
                 onMusicMutedChange={setIsMusicMuted}
                 onSfxMutedChange={setIsSfxMuted}
