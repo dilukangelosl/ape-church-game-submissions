@@ -13,7 +13,7 @@
     display: flex;
     align-items: stretch;
     justify-content: stretch;
-    padding: clamp(16px, 2.8vw, 28px);
+    padding: clamp(8px, 1.4vw, 12px);
     background: #1A2328;
 }
 
@@ -65,6 +65,7 @@
     box-shadow: none;
     cursor: default;
     overflow: visible;
+    z-index: 8;
     animation: mines-tile-reveal 0.62s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
 }
 
@@ -212,7 +213,7 @@
     background-repeat: no-repeat;
     background-size: 500% 500%;
     background-position: 0% 0%;
-    transform: translate(-15px, -7px) scale(1.24);
+    transform: translate(-14px, -7px) scale(1.28);
     transform-origin: center;
     opacity: 0;
     z-index: 3;
@@ -1192,7 +1193,7 @@ body.hilo-suppress-result-open .absolute.inset-0.z-30 {
 @media (max-width: 768px) {
     .mines-fire-frame-border {
         inset: -20px;
-        transform: translate(-7px, -5px) scale(1.15);
+        transform: translate(-6px, -5px) scale(1.18);
     }
 
     .mines-root .absolute.bottom-4.right-4 {

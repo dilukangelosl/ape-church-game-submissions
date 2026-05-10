@@ -277,7 +277,7 @@ const MinesWindow: React.FC<MinesWindowProps> = ({
                     display: "grid",
                     gridTemplateColumns: `repeat(${BOARD_COLUMNS}, 1fr)`,
                     gridTemplateRows: `repeat(${BOARD_COLUMNS}, minmax(0, 1fr))`,
-                    gap: "clamp(11px, 2.1vw, 16px)",
+                    gap: "clamp(8px, 1.2vw, 12px)",
                     width: "100%",
                     height: "100%",
                 }}
