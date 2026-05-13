@@ -17,11 +17,8 @@ import {
     createDeckFromRandomWord,
     getRankOutcomes,
     getStepMultiplier,
+    myGame,
 } from "./hiloConfig";
-
-interface MyGameProps {
-    game: Game;
-}
 
 interface CardHistoryEntry {
     card: Card;
@@ -88,7 +85,8 @@ const toSafePositiveInt = (value: number, fallback = 1, maxValue = Number.POSITI
     return Math.min(maxValue, Math.max(1, Math.floor(value)));
 };
 
-const MyGame: React.FC<MyGameProps> = ({ game }) => {
+const MyGame: React.FC = () => {
+    const game = myGame;
     const searchParams = useSearchParams();
     const replayId = searchParams.get("id");
 
