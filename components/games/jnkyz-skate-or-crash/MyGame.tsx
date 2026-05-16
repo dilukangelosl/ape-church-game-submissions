@@ -7,9 +7,14 @@ import { Game, randomBytes } from "@/lib/games";
 import { bytesToHex } from "viem";
 import { toast } from "sonner";
 import { Howl } from "howler";
+import { Button } from "@/components/ui/button";
+import { AudioLines, Volume2, VolumeX } from "lucide-react";
 import MyGameSetupCard from "./MyGameSetupCard";
 import MyGameWindow from "./MyGameWindow";
-import { myGame } from "./myGameConfig";
+
+interface MyGameComponentProps {
+    game: Game;
+}
 
 interface LastRoundSnapshot {
     betAmount: number;
@@ -39,8 +44,7 @@ const roundToTwoDecimals = (value: number): number =>
 const clamp = (value: number, min: number, max: number): number =>
     Math.max(min, Math.min(max, value));
 
-const MyGameComponent: React.FC = () => {
-    const game = myGame;
+const MyGameComponent: React.FC<MyGameComponentProps> = ({ game }) => {
     const router = useRouter();
     const [replayIdString, setReplayIdString] = useState<string | null>(null);
     const inReplayMode = replayIdString !== null;
@@ -59,8 +63,9 @@ const MyGameComponent: React.FC = () => {
     const [payout, setPayout] = useState<number | null>(null);
     const [didCashout, setDidCashout] = useState(false);
     const [elapsedMs, setElapsedMs] = useState(0);
-    const [showRulesModal, setShowRulesModal] = useState(true);
+    const [splashDismissed, setSplashDismissed] = useState(false);
     const [sfxMuted, setSfxMuted] = useState(false);
+    const [musicMuted, setMusicMuted] = useState(false);
     const [musicVolumeMultiplier, setMusicVolumeMultiplier] = useState(1);
 
     const [currentGameId, setCurrentGameId] = useState<bigint>(
@@ -405,36 +410,101 @@ const MyGameComponent: React.FC = () => {
     return (
         <div className="relative">
             <div className="flex flex-col lg:flex-row gap-4 sm:gap-8 lg:gap-10">
-                <GameWindow
-                    game={game}
-                    currentGameId={currentGameId}
-                    isLoading={isLoading}
-                    isGameFinished={currentView === 2}
-                    onPlayAgain={handlePlayAgain}
-                    playAgainText={playAgainText}
-                    onRewatch={handleRewatch}
-                    onReset={handleReset}
-                    betAmount={betAmount}
-                    payout={payout}
-                    inReplayMode={inReplayMode}
-                    isUserOriginalPlayer={true}
-                    showPNL={showPNL}
-                    isGamePaused={false}
-                    resultModalDelayMs={800}
-                    onSfxMutedChange={setSfxMuted}
-                    // musicVolumeMultiplier={musicVolumeMultiplier}
-                >
-                    <MyGameWindow
+                <div className="relative w-full min-w-0 lg:basis-2/3">
+                    <GameWindow
                         game={game}
-                        multiplier={multiplier}
-                        crashAt={crashAt}
-                        isGameOngoing={isGameOngoing}
-                        isCrashed={isCrashed}
-                        elapsedMs={elapsedMs}
-                        didCashout={didCashout}
+                        currentGameId={currentGameId}
+                        isLoading={isLoading}
+                        isGameFinished={currentView === 2}
+                        onPlayAgain={handlePlayAgain}
+                        playAgainText={playAgainText}
+                        onRewatch={handleRewatch}
+                        onReset={handleReset}
+                        betAmount={betAmount}
+                        payout={payout}
+                        inReplayMode={inReplayMode}
+                        isUserOriginalPlayer={true}
+                        showPNL={showPNL}
+                        isGamePaused={false}
+                        resultModalDelayMs={800}
+                        musicMuted={musicMuted}
+                        onMusicMutedChange={setMusicMuted}
                         sfxMuted={sfxMuted}
-                    />
-                </GameWindow>
+                        onSfxMutedChange={setSfxMuted}
+                        musicVolumeMultiplier={musicVolumeMultiplier}
+                    >
+                        <MyGameWindow
+                            game={game}
+                            multiplier={multiplier}
+                            crashAt={crashAt}
+                            isGameOngoing={isGameOngoing}
+                            isCrashed={isCrashed}
+                            elapsedMs={elapsedMs}
+                            didCashout={didCashout}
+                            sfxMuted={sfxMuted}
+                        />
+                    </GameWindow>
+
+                    {!splashDismissed ? (
+                        <div className="absolute inset-0 z-[35] flex flex-col overflow-hidden rounded-[12px] bg-[#050a0e]">
+                            <div className="absolute bottom-4 right-4 z-[40] flex items-center gap-2">
+                                <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="icon"
+                                    className="p-2 bg-[#151C21]/40 rounded-[8px] text-[#91989C]"
+                                    onClick={() => setSfxMuted((prev) => !prev)}
+                                    title={sfxMuted ? "Unmute SFX" : "Mute SFX"}
+                                >
+                                    {sfxMuted ? (
+                                        <AudioLines className="h-5 w-5 opacity-40" />
+                                    ) : (
+                                        <AudioLines className="h-5 w-5" />
+                                    )}
+                                </Button>
+                                <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="icon"
+                                    className="p-2 bg-[#151C21]/40 rounded-[8px] text-[#91989C]"
+                                    onClick={() => setMusicMuted((prev) => !prev)}
+                                    title={musicMuted ? "Unmute music" : "Mute music"}
+                                >
+                                    {musicMuted ? (
+                                        <VolumeX className="h-6 w-6" />
+                                    ) : (
+                                        <Volume2 className="h-6 w-6" />
+                                    )}
+                                </Button>
+                            </div>
+                            <div className="min-h-0 flex-1">
+                                <video
+                                    className="h-full w-full object-contain"
+                                    autoPlay
+                                    loop
+                                    muted
+                                    playsInline
+                                    preload="auto"
+                                >
+                                    <source
+                                        src="/submissions/jnkyz-skate-or-crash/splash-screen.webm"
+                                        type="video/webm"
+                                    />
+                                </video>
+                            </div>
+                            <div className="pointer-events-none absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-[#050a0e] to-transparent sm:h-36" />
+                            <div className="absolute inset-x-0 bottom-0 flex justify-center px-4 pb-5 pt-4 sm:pb-7">
+                                <button
+                                    type="button"
+                                    onClick={() => setSplashDismissed(true)}
+                                    className="min-w-[180px] rounded-md border border-[#7FFFD4]/40 bg-[#7FFFD4] px-6 py-2.5 text-xs font-black uppercase tracking-[0.12em] text-[#042d28] shadow-[0_0_24px_rgba(127,255,212,0.35)] transition hover:opacity-95 active:scale-[0.98] sm:px-8 sm:py-3 sm:text-sm"
+                                >
+                                    Agree &amp; Play
+                                </button>
+                            </div>
+                        </div>
+                    ) : null}
+                </div>
 
                 <MyGameSetupCard
                     game={game}
@@ -459,35 +529,9 @@ const MyGameComponent: React.FC = () => {
                     maxBet={walletBalance}
                     isGameOngoing={isGameOngoing}
                     crashAt={crashAt}
+                    introSplashActive={!splashDismissed}
                 />
             </div>
-
-            {showRulesModal && currentView === 0 ? (
-                <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/65 p-4 backdrop-blur-sm">
-                    <div className="w-full max-w-xl rounded-xl border border-[#7FFFD455] bg-[#07131B]/95 p-6 text-white shadow-[0_0_28px_rgba(0,229,255,0.2)]">
-                        <h2 className="text-xl font-black tracking-[0.08em] uppercase text-[#7FFFD4]">
-                            How To Play Skate Crash
-                        </h2>
-                        <ul className="mt-4 space-y-2 text-sm text-white/90">
-                            <li>1. Set your bet amount and optional auto-cashout target.</li>
-                            <li>2. Press <span className="font-semibold">Place Your Bet</span> to start the run.</li>
-                            <li>3. Multiplier rises while JNKYZ skates - cash out before crash.</li>
-                            <li>4. If crash happens first, you lose that round's bet.</li>
-                            <li>5. Use Play Again, Rewatch, or Change Bet after each round.</li>
-                        </ul>
-                        <p className="mt-4 text-xs text-[#8AD9E8]">
-                            Tip: Auto Cashout helps lock profit automatically at your target multiplier.
-                        </p>
-                        <button
-                            type="button"
-                            onClick={() => setShowRulesModal(false)}
-                            className="mt-5 w-full rounded-md bg-[#7FFFD4] px-4 py-2 text-sm font-black uppercase tracking-[0.08em] text-[#042d28] hover:opacity-95"
-                        >
-                            Got It, Let's Skate
-                        </button>
-                    </div>
-                </div>
-            ) : null}
         </div>
     );
 };

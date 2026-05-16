@@ -40,6 +40,7 @@ interface MyGameSetupCardProps {
     maxBet: number;
     isGameOngoing: boolean;
     crashAt: number | null;
+    introSplashActive?: boolean;
 }
 
 const AUTO_CASHOUT_INFO =
@@ -73,6 +74,7 @@ const MyGameSetupCard: React.FC<MyGameSetupCardProps> = ({
     minBet,
     isGameOngoing,
     crashAt,
+    introSplashActive = false,
 }) => {
     const themeColorBackground = BRAND_PRIMARY;
     const [usdMode, setUsdMode] = React.useState(false);
@@ -262,16 +264,31 @@ const MyGameSetupCard: React.FC<MyGameSetupCardProps> = ({
             <div className="mb-5 flex items-center justify-between rounded-md border border-[#7FFFD444] bg-[#07131B]/75 px-3 py-2">
                 <div>
                     <p className="text-sm font-bold tracking-[0.06em] text-[#ECFFFB]">{game.title}</p>
-                    <div className="mt-2 text-3xl font-black tracking-[0.06em] text-[#7FFFD4] drop-shadow-[0_0_18px_rgba(127,255,212,0.5)]">
-                        {multiplier.toFixed(2)}x
-                    </div>
-                    <div className="mt-1 text-xs uppercase tracking-[0.09em] text-[#D8FFF6]">
-                        {statusText}
-                    </div>
-                    <div className="mt-1 flex gap-3 text-[11px] text-[#98C9D3]">
-                        <span>{secondsText}</span>
-                        <span>Crash @{crashAt ? `${crashAt.toFixed(2)}x` : "--"}</span>
-                    </div>
+                    {introSplashActive && currentView === 0 ? (
+                        <>
+                            <p className="mt-2 text-lg font-black uppercase tracking-[0.08em] text-[#7FFFD4]">
+                                How To Play
+                            </p>
+                            <p className="mt-1 text-xs leading-relaxed text-[#8AD9E8]">
+                                Read the rules, then tap{" "}
+                                <span className="font-semibold text-[#C9FFF3]">Agree &amp; Play</span>{" "}
+                                on the game screen to set your bet and play.
+                            </p>
+                        </>
+                    ) : (
+                        <>
+                            <div className="mt-2 text-3xl font-black tracking-[0.06em] text-[#7FFFD4] drop-shadow-[0_0_18px_rgba(127,255,212,0.5)]">
+                                {multiplier.toFixed(2)}x
+                            </div>
+                            <div className="mt-1 text-xs uppercase tracking-[0.09em] text-[#D8FFF6]">
+                                {statusText}
+                            </div>
+                            <div className="mt-1 flex gap-3 text-[11px] text-[#98C9D3]">
+                                <span>{secondsText}</span>
+                                <span>Crash @{crashAt ? `${crashAt.toFixed(2)}x` : "--"}</span>
+                            </div>
+                        </>
+                    )}
                 </div>
                 <img
                     src="/submissions/jnkyz-skate-or-crash/ui/jnkyz-logo-white.png"
@@ -279,7 +296,27 @@ const MyGameSetupCard: React.FC<MyGameSetupCardProps> = ({
                     className="h-8 w-8 rounded-xl border border-[#7FFFD455] bg-transparent p-1 object-contain mix-blend-normal opacity-100"
                 />
             </div>
-            {currentView === 0 && (
+            {currentView === 0 && introSplashActive ? (
+                <>
+                    <CardContent className="font-roboto grow">
+                        <ul className="space-y-2.5 text-sm text-white/90">
+                            <li>1. Set your bet amount and optional auto-cashout target.</li>
+                            <li>
+                                2. Press <span className="font-semibold">Place Your Bet</span> to start
+                                the run.
+                            </li>
+                            <li>3. Multiplier rises while Wade skates — cash out before crash.</li>
+                            <li>4. If crash happens first, you lose that round&apos;s bet.</li>
+                            <li>5. Use Play Again, Rewatch, or Change Bet after each round.</li>
+                        </ul>
+                        <p className="mt-4 text-xs text-[#8AD9E8]">
+                            Tip: Auto Cashout locks profit automatically at your target multiplier.
+                        </p>
+                    </CardContent>
+                    <div className="grow" />
+                </>
+            ) : null}
+            {currentView === 0 && !introSplashActive ? (
                 <>
                     <CardContent className="font-roboto">
                         {/* place your bet button - mobile */}
@@ -412,7 +449,7 @@ const MyGameSetupCard: React.FC<MyGameSetupCardProps> = ({
                         </Button>
                     </CardFooter>
                 </>
-            )}
+            ) : null}
             {currentView === 1 && (
                 <CardContent className="grow font-roboto flex flex-col-reverse lg:flex-col lg:justify-between gap-8">
                     {/* show in usd option + stats */}
@@ -420,9 +457,6 @@ const MyGameSetupCard: React.FC<MyGameSetupCardProps> = ({
 
                     <div className="flex lg:flex-col justify-evenly items-center">
                         <div className="font-roboto flex flex-col items-center gap-3 w-full">
-                            <p className="text-sm text-[#8AD9E8]">
-                                Live Multiplier: {multiplier.toFixed(2)}x
-                            </p>
                             <Button
                                 onClick={onCashout}
                                 className={primaryButtonClass}

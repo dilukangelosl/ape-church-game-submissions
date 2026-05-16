@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { Howl } from "howler";
-import { Volume2, VolumeX, Music, AudioLines } from "lucide-react";
+import { Volume2, VolumeX, AudioLines } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import GameResultsModal from "./GameResultsModal";
 import { Game } from "@/lib/games";
@@ -30,13 +30,16 @@ type GameWindowProps = {
     currentGameId: bigint;
 
     disableBuiltInSong?: boolean;
+    /** When set, music mute is controlled by the parent (e.g. splash overlay toggles). */
+    musicMuted?: boolean;
     onMusicMutedChange?: (muted: boolean) => void;
+    /** When set, SFX mute is controlled by the parent. */
+    sfxMuted?: boolean;
     onSfxMutedChange?: (muted: boolean) => void;
+    musicVolumeMultiplier?: number;
 
     resultModalDelayMs?: number;
 };
-
-const fallbackSong = "/shared/audio/song.mp3";
 
 const GameWindow: React.FC<GameWindowProps> = ({
     game,
@@ -59,23 +62,32 @@ const GameWindow: React.FC<GameWindowProps> = ({
     currentGameId,
 
     disableBuiltInSong = false,
+    musicMuted: controlledMusicMuted,
     onMusicMutedChange,
+    sfxMuted: controlledSfxMuted,
     onSfxMutedChange,
+    musicVolumeMultiplier = 1,
 
     resultModalDelayMs = 0,
 }) => {
     const audioRef = useRef<Howl | null>(null);
-    const [muteMusic, setMuteMusic] = useState(false);
-    const [muteSfx, setMuteSfx] = useState(false);
+    const musicIsControlled = typeof controlledMusicMuted === "boolean";
+    const sfxIsControlled = typeof controlledSfxMuted === "boolean";
+    const [internalMuteMusic, setInternalMuteMusic] = useState(false);
+    const [internalMuteSfx, setInternalMuteSfx] = useState(false);
+    const muteMusic = musicIsControlled ? controlledMusicMuted! : internalMuteMusic;
+    const muteSfx = sfxIsControlled ? controlledSfxMuted! : internalMuteSfx;
     const [showResults, setShowResults] = useState(false);
 
+    const hasBuiltInSong = !disableBuiltInSong && Boolean(game.song);
+
     useEffect(() => {
-        if (disableBuiltInSong) return;
+        if (!hasBuiltInSong) return;
 
         const sound = new Howl({
-            src: [game.song || fallbackSong],
+            src: [game.song!],
             loop: true,
-            volume: 0.5,
+            volume: 0.5 * musicVolumeMultiplier,
             mute: muteMusic,
         });
 
@@ -89,26 +101,29 @@ const GameWindow: React.FC<GameWindowProps> = ({
             sound.unload();
             audioRef.current = null;
         };
-    }, [game.song, disableBuiltInSong]);
+    }, [game.song, hasBuiltInSong]);
 
     useEffect(() => {
-        if (disableBuiltInSong) return;
+        if (!hasBuiltInSong) return;
         const audio = audioRef.current;
         if (!audio) return;
 
         audio.mute(muteMusic);
+        audio.volume(0.5 * musicVolumeMultiplier);
         if (!muteMusic && !audio.playing()) {
             audio.play();
         }
-    }, [muteMusic, disableBuiltInSong]);
+    }, [muteMusic, hasBuiltInSong, musicVolumeMultiplier]);
 
     useEffect(() => {
+        if (musicIsControlled) return;
         onMusicMutedChange?.(muteMusic);
-    }, [muteMusic, onMusicMutedChange]);
+    }, [musicIsControlled, muteMusic, onMusicMutedChange]);
 
     useEffect(() => {
+        if (sfxIsControlled) return;
         onSfxMutedChange?.(muteSfx);
-    }, [muteSfx, onSfxMutedChange]);
+    }, [sfxIsControlled, muteSfx, onSfxMutedChange]);
 
     useEffect(() => {
         if (isGameFinished && resultModalDelayMs > 0) {
@@ -205,7 +220,11 @@ const GameWindow: React.FC<GameWindowProps> = ({
                     variant="ghost"
                     size="icon"
                     className="p-2 bg-[#151C21]/40 rounded-[8px] text-[#91989C]"
-                    onClick={() => setMuteSfx((prev) => !prev)}
+                    onClick={() => {
+                        const next = !muteSfx;
+                        if (sfxIsControlled) onSfxMutedChange?.(next);
+                        else setInternalMuteSfx(next);
+                    }}
                     title={muteSfx ? "Unmute SFX" : "Mute SFX"}
                 >
                     {muteSfx ? (
@@ -215,19 +234,25 @@ const GameWindow: React.FC<GameWindowProps> = ({
                     )}
                 </Button>
 
-                <Button
-                    variant="ghost"
-                    size="icon"
-                    className="p-2 bg-[#151C21]/40 rounded-[8px] text-[#91989C]"
-                    onClick={() => setMuteMusic((prev) => !prev)}
-                    title={muteMusic ? "Unmute music" : "Mute music"}
-                >
-                    {muteMusic ? (
-                        <VolumeX className="w-6 h-6" />
-                    ) : (
-                        <Volume2 className="w-6 h-6" />
-                    )}
-                </Button>
+                {hasBuiltInSong ? (
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        className="p-2 bg-[#151C21]/40 rounded-[8px] text-[#91989C]"
+                        onClick={() => {
+                            const next = !muteMusic;
+                            if (musicIsControlled) onMusicMutedChange?.(next);
+                            else setInternalMuteMusic(next);
+                        }}
+                        title={muteMusic ? "Unmute music" : "Mute music"}
+                    >
+                        {muteMusic ? (
+                            <VolumeX className="w-6 h-6" />
+                        ) : (
+                            <Volume2 className="w-6 h-6" />
+                        )}
+                    </Button>
+                ) : null}
             </div>
         </div>
     );
