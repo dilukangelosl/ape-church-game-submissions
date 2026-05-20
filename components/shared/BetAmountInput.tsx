@@ -15,6 +15,8 @@ interface CompactAmountInputProps {
     usdMode: boolean;
     setUsdMode: (mode: boolean) => void;
     themeColorBackground: string;
+    balanceUnitLabel?: string;
+    currencyToken?: "ape" | "gp";
 }
 
 export const BetAmountInput: React.FC<CompactAmountInputProps> = ({
@@ -27,8 +29,15 @@ export const BetAmountInput: React.FC<CompactAmountInputProps> = ({
     disabled,
     usdMode,
     setUsdMode,
-    themeColorBackground
+    themeColorBackground,
+    balanceUnitLabel = "APE",
+    currencyToken = "ape",
 }) => {
+    const tokenIconSrc =
+        currencyToken === "gp"
+            ? "/images/logos/gp-icon.svg"
+            : "/images/icons/ape_coin.png";
+    const tokenIconAlt = currencyToken === "gp" ? "GP" : "ApeCoin";
 
     const [inputValue, setInputValue] = useState(String(value));
 
@@ -91,10 +100,18 @@ export const BetAmountInput: React.FC<CompactAmountInputProps> = ({
             {/* Top row: "Bet Amount" label and Balance display */}
             <div className="flex items-center justify-between gap-2 text-sm font-medium text-gray-400">
                 <p>Bet Amount</p>
-                <div className="flex items-center gap-1.5 cursor-pointer" onClick={() => setUsdMode(!usdMode)}>
+                <div
+                    className="flex items-center gap-1.5 cursor-pointer"
+                    title="Click to toggle USD"
+                    onClick={() => setUsdMode(!usdMode)}
+                >
                     <Wallet size={16} />
-                    <p className="font-semibold text-gray-300">
-                        {disabled ? "Loading..." : usdMode ? `$${balance.toFixed(2)}` : `${balance.toFixed(2)} APE`}
+                    <p className="font-semibold text-gray-300 transition-colors hover:text-white/90">
+                        {disabled
+                            ? "Loading..."
+                            : usdMode
+                                ? `$${balance.toFixed(2)}`
+                                : `${balance.toFixed(2)} ${balanceUnitLabel}`}
                     </p>
                 </div>
             </div>
@@ -110,10 +127,11 @@ export const BetAmountInput: React.FC<CompactAmountInputProps> = ({
                     />
                 ) : (
                     <Image
-                        src="/shared/ape_coin.png"
-                        alt="Ape Coin Icon"
+                        src={tokenIconSrc}
+                        alt={tokenIconAlt}
                         width={20}
                         height={20}
+                        unoptimized
                         onClick={() => setUsdMode(true)}
                         className="cursor-pointer shrink-0"
                     />

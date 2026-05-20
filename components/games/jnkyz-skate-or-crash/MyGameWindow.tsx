@@ -163,13 +163,11 @@ const MyGameWindow: React.FC<MyGameWindowProps> = ({
         );
 
         const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-        const renderScale = 0.5;
-        const basePixelRatio = Math.min(window.devicePixelRatio, 2);
-        renderer.setPixelRatio(basePixelRatio * renderScale);
+        const pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
+        renderer.setPixelRatio(pixelRatio);
         renderer.setSize(container.clientWidth, container.clientHeight, false);
         renderer.domElement.style.width = "100%";
         renderer.domElement.style.height = "100%";
-        renderer.domElement.style.imageRendering = "pixelated";
         renderer.shadowMap.enabled = true;
         renderer.shadowMap.type = THREE.PCFSoftShadowMap;
         container.appendChild(renderer.domElement);
@@ -646,7 +644,7 @@ const MyGameWindow: React.FC<MyGameWindowProps> = ({
                 />
                 {isCrashed ? (
                     <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-                        <div className="rounded-2xl border border-white/25 bg-black/35 px-8 py-6 text-center backdrop-blur-[1px]">
+                        <div className="rounded-2xl border border-white/25 bg-black/35 px-8 py-6 text-center">
                             <img
                                 src="/submissions/jnkyz-skate-or-crash/ui/jnkyz-art-white-cutout-v3.png"
                                 alt="JNKYZ Crashed"

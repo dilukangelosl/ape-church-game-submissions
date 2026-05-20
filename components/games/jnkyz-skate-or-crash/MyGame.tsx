@@ -49,7 +49,11 @@ const MyGameComponent: React.FC<MyGameComponentProps> = ({ game }) => {
     const [replayIdString, setReplayIdString] = useState<string | null>(null);
     const inReplayMode = replayIdString !== null;
 
-    const [walletBalance, setWalletBalance] = useState(100000);
+    const [playCurrency, setPlayCurrency] = useState<"ape" | "gp">("ape");
+    const playCurrencyRef = useRef<"ape" | "gp">("ape");
+    const [apeWallet, setApeWallet] = useState(100_000);
+    const [gpWallet, setGpWallet] = useState(500_000);
+    const walletBalance = playCurrency === "ape" ? apeWallet : gpWallet;
 
     const [currentView, setCurrentView] = useState<0 | 1 | 2>(0);
     const [isLoading, setIsLoading] = useState(false);
@@ -83,6 +87,10 @@ const MyGameComponent: React.FC<MyGameComponentProps> = ({ game }) => {
     const roundEndedRef = useRef(false);
 
     useEffect(() => {
+        playCurrencyRef.current = playCurrency;
+    }, [playCurrency]);
+
+    useEffect(() => {
         if (typeof window === "undefined") {
             return;
         }
@@ -103,6 +111,13 @@ const MyGameComponent: React.FC<MyGameComponentProps> = ({ game }) => {
         }
         setCurrentGameId(BigInt(replayIdString));
     }, [replayIdString]);
+
+    useEffect(() => {
+        const max = playCurrency === "ape" ? apeWallet : gpWallet;
+        setBetAmount((prev) =>
+            prev > max ? Math.max(MIN_BET, roundToTwoDecimals(max)) : prev,
+        );
+    }, [playCurrency, apeWallet, gpWallet]);
 
     useEffect(() => {
         winSfxRef.current = new Howl({
@@ -226,7 +241,12 @@ const MyGameComponent: React.FC<MyGameComponentProps> = ({ game }) => {
                 ? roundToTwoDecimals(betAmount * resolvedMultiplier)
                 : 0;
             if (resolvedPayout > 0) {
-                setWalletBalance((prev) => roundToTwoDecimals(prev + resolvedPayout));
+                const c = playCurrencyRef.current;
+                if (c === "ape") {
+                    setApeWallet((prev) => roundToTwoDecimals(prev + resolvedPayout));
+                } else {
+                    setGpWallet((prev) => roundToTwoDecimals(prev + resolvedPayout));
+                }
             }
 
             sessionStatsRef.current = {
@@ -297,7 +317,8 @@ const MyGameComponent: React.FC<MyGameComponentProps> = ({ game }) => {
     const playGame = async (): Promise<void> => {
         stopResultSfxForNewRound();
         if (betAmount < MIN_BET) {
-            toast.error(`Bet must be at least ${MIN_BET} APE.`);
+            const unit = playCurrency === "ape" ? "APE" : "GP";
+            toast.error(`Bet must be at least ${MIN_BET} ${unit}.`);
             return;
         }
         if (betAmount > walletBalance) {
@@ -314,7 +335,12 @@ const MyGameComponent: React.FC<MyGameComponentProps> = ({ game }) => {
         setPayout(null);
         setMultiplier(1);
         setElapsedMs(0);
-        setWalletBalance((prev) => roundToTwoDecimals(prev - betAmount));
+        const c = playCurrencyRef.current;
+        if (c === "ape") {
+            setApeWallet((prev) => roundToTwoDecimals(prev - betAmount));
+        } else {
+            setGpWallet((prev) => roundToTwoDecimals(prev - betAmount));
+        }
 
         console.log("Mock transaction submitted for crash game round.");
 
@@ -530,6 +556,11 @@ const MyGameComponent: React.FC<MyGameComponentProps> = ({ game }) => {
                     isGameOngoing={isGameOngoing}
                     crashAt={crashAt}
                     introSplashActive={!splashDismissed}
+                    playCurrency={playCurrency}
+                    onPlayCurrencyChange={setPlayCurrency}
+                    currencySwitchDisabled={
+                        isLoading || isGameOngoing || currentView !== 0
+                    }
                 />
             </div>
         </div>

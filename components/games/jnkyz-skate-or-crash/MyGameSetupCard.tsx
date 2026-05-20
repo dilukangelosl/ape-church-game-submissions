@@ -41,6 +41,9 @@ interface MyGameSetupCardProps {
     isGameOngoing: boolean;
     crashAt: number | null;
     introSplashActive?: boolean;
+    playCurrency: "ape" | "gp";
+    onPlayCurrencyChange: (currency: "ape" | "gp") => void;
+    currencySwitchDisabled: boolean;
 }
 
 const AUTO_CASHOUT_INFO =
@@ -50,6 +53,7 @@ const MAX_PROFIT_INFO =
 const BRAND_PRIMARY = "#7FFFD4";
 const BRAND_SURFACE = "linear-gradient(160deg, rgba(7, 20, 28, 0.95), rgba(15, 40, 53, 0.9))";
 const BRAND_BORDER = "rgba(127, 255, 212, 0.35)";
+const TOKEN_USD_RATE = 1;
 
 const MyGameSetupCard: React.FC<MyGameSetupCardProps> = ({
     game,
@@ -75,8 +79,12 @@ const MyGameSetupCard: React.FC<MyGameSetupCardProps> = ({
     isGameOngoing,
     crashAt,
     introSplashActive = false,
+    playCurrency,
+    onPlayCurrencyChange,
+    currencySwitchDisabled,
 }) => {
     const themeColorBackground = BRAND_PRIMARY;
+    const tokenLabel = playCurrency === "ape" ? "APE" : "GP";
     const [usdMode, setUsdMode] = React.useState(false);
     const [autoEnabled, setAutoEnabled] = React.useState(autoCashoutAt !== null);
     const primaryButtonClass =
@@ -98,39 +106,61 @@ const MyGameSetupCard: React.FC<MyGameSetupCardProps> = ({
         return walletBalance;
     };
 
+    const formatTokenAmount = (
+        amount: number,
+        opts?: { minFrac?: number; maxFrac?: number },
+    ): string => {
+        const defaultMin = usdMode ? 2 : 0;
+        const defaultMax = usdMode ? 2 : 3;
+        let minFrac = opts?.minFrac ?? defaultMin;
+        let maxFrac = opts?.maxFrac ?? defaultMax;
+        if (minFrac > maxFrac) {
+            minFrac = maxFrac;
+        }
+        if (usdMode) {
+            return `$${(amount * TOKEN_USD_RATE).toLocaleString([], {
+                minimumFractionDigits: minFrac,
+                maximumFractionDigits: maxFrac,
+            })}`;
+        }
+        return `${amount.toLocaleString([], {
+            minimumFractionDigits: minFrac,
+            maximumFractionDigits: maxFrac,
+        })} ${tokenLabel}`;
+    };
+
     const getCurrentWalletAmountString = (): string => {
-        return `${walletBalance.toFixed(2)} APE`;
+        return formatTokenAmount(walletBalance, { minFrac: 2, maxFrac: 2 });
     };
 
-    const getBetAmountText = (): string => {
-        return `${(betAmount || 0).toLocaleString([], {
-            minimumFractionDigits: 0,
-            maximumFractionDigits: 3,
-        })} APE`;
+    const getBetAmountText = (): string => formatTokenAmount(betAmount || 0);
 
-    };
+    const getTotalBuyInText = (): string => formatTokenAmount(betAmount || 0);
 
-    const getTotalBuyInText = (): string => {
-        return `${(betAmount || 0).toLocaleString([], {
-            minimumFractionDigits: 0,
-            maximumFractionDigits: 3,
-        })} APE`;
-    };
-
-    const getTotalPayoutText = (): string => {
-        return `${(payout || 0).toLocaleString([], {
-            minimumFractionDigits: 0,
-            maximumFractionDigits: 3,
-        })} APE`;
-    };
+    const getTotalPayoutText = (): string => formatTokenAmount(payout || 0);
 
     const getMaxProfitString = (): string => {
         const projected = autoCashoutAt ? betAmount * autoCashoutAt : 0;
-        return `${projected.toLocaleString([], {
-            minimumFractionDigits: 0,
-            maximumFractionDigits: 3,
-        })} APE`;
+        return formatTokenAmount(projected);
     };
+
+    const getMaxBetText = (): string => formatTokenAmount(maxBet, { maxFrac: 0 });
+
+    const AmountValue = ({
+        children,
+        className = "",
+    }: {
+        children: React.ReactNode;
+        className?: string;
+    }) => (
+        <p
+            className={`text-right cursor-pointer transition-colors hover:text-[#C9FFF3] ${className}`}
+            title="Click to toggle USD"
+            onClick={() => setUsdMode(!usdMode)}
+        >
+            {children}
+        </p>
+    );
 
     const ShowInUsdAndStats = (invertOnDesktop: boolean) => {
         const showGreenText = (payout || 0) > betAmount;
@@ -149,42 +179,20 @@ const MyGameSetupCard: React.FC<MyGameSetupCardProps> = ({
                     </p>
                 )}
 
-                {/* show in usd option */}
-                <div className="flex items-center justify-between gap-2">
-                    <div>
-                        <p className="text-foreground text-lg font-semibold">
-                            Show Bets in USD
-                        </p>
-                        <p className="text-sm">
-                            Your bets are valued in {usdMode ? "US Dollars" : "APE"}
-                        </p>
-                    </div>
-                    <Switch
-                        checked={usdMode}
-                        onCheckedChange={() => {
-                            setUsdMode(!usdMode);
-                        }}
-                    />
-                </div>
-
-                {/* stats */}
                 <div className="w-full flex flex-col items-center gap-2 font-medium text-xs text-[#91989C]">
-                    {/* bet per spin */}
                     <div className="w-full flex justify-between items-center gap-2">
                         <p>Bet Amount</p>
-                        <p className="text-right">{getBetAmountText()}</p>
+                        <AmountValue>{getBetAmountText()}</AmountValue>
                     </div>
-                    {/* bet per spin */}
                     <div className="w-full flex justify-between items-center gap-2">
                         <p>Total Buy In</p>
-                        <p className="text-right">{getTotalBuyInText()}</p>
+                        <AmountValue>{getTotalBuyInText()}</AmountValue>
                     </div>
-                    {/* total pay out */}
                     <div className="w-full flex justify-between items-center gap-2">
                         <p>Total Pay Out</p>
-                        <p className={`text-right ${showGreenText ? "text-success" : ""}`}>
+                        <AmountValue className={showGreenText ? "text-success" : ""}>
                             {getTotalPayoutText()}
-                        </p>
+                        </AmountValue>
                     </div>
                 </div>
             </div>
@@ -208,44 +216,24 @@ const MyGameSetupCard: React.FC<MyGameSetupCardProps> = ({
                     </p>
                 )}
 
-                {/* show in usd option */}
-                <div className="flex items-center justify-between gap-2">
-                    <div>
-                        <p className="text-foreground text-lg font-semibold">
-                            Show Bets in USD
-                        </p>
-                        <p className="text-sm">Your bets are valued in US Dollars</p>
-                    </div>
-                    <Switch
-                        checked={usdMode}
-                        onCheckedChange={() => {
-                            setUsdMode(!usdMode);
-                        }}
-                    />
-                </div>
-
-                {/* stats */}
                 <div className="w-full flex flex-col items-center gap-2 font-medium text-xs text-[#91989C]">
-                    {/* bet amount */}
                     <div className="w-full flex justify-between items-center gap-2">
                         <p>Bet Amount</p>
-                        <p className="text-right">{getBetAmountText()}</p>
+                        <AmountValue>{getBetAmountText()}</AmountValue>
                     </div>
-                    {/* bet per spin */}
                     <div className="w-full flex justify-between items-center gap-2">
                         <p>Total Buy In</p>
-                        <p className="text-right">{getTotalBuyInText()}</p>
+                        <AmountValue>{getTotalBuyInText()}</AmountValue>
                     </div>
-                    {/* total pay out */}
                     <div className="w-full flex justify-between items-center gap-2">
                         <p>Total Pay Out</p>
-                        <p className={`text-right ${showGreenText ? "text-success" : ""}`}>
+                        <AmountValue className={showGreenText ? "text-success" : ""}>
                             {getTotalPayoutText()}
-                        </p>
+                        </AmountValue>
                     </div>
                     <div className="w-full flex justify-between items-center gap-2">
                         <p>Wallet Balance</p>
-                        <p className="text-right">{getCurrentWalletAmountString()}</p>
+                        <AmountValue>{getCurrentWalletAmountString()}</AmountValue>
                     </div>
                 </div>
             </div>
@@ -300,7 +288,9 @@ const MyGameSetupCard: React.FC<MyGameSetupCardProps> = ({
                 <>
                     <CardContent className="font-roboto grow">
                         <ul className="space-y-2.5 text-sm text-white/90">
-                            <li>1. Set your bet amount and optional auto-cashout target.</li>
+                            <li>1. Choose <span className="font-semibold">ApeCoin</span> or{" "}
+                                <span className="font-semibold">GP</span> (game points), set your bet, and optional
+                                auto-cashout.</li>
                             <li>
                                 2. Press <span className="font-semibold">Place Your Bet</span> to start
                                 the run.
@@ -319,6 +309,33 @@ const MyGameSetupCard: React.FC<MyGameSetupCardProps> = ({
             {currentView === 0 && !introSplashActive ? (
                 <>
                     <CardContent className="font-roboto">
+                        <div className="mb-4 flex items-center justify-end gap-2 text-xs">
+                            <span
+                                className={
+                                    playCurrency === "ape"
+                                        ? "font-semibold text-[#C9FFF3]"
+                                        : "text-[#8AD9E8]"
+                                }
+                            >
+                                APE
+                            </span>
+                            <Switch
+                                checked={playCurrency === "gp"}
+                                disabled={currencySwitchDisabled}
+                                onCheckedChange={(checked) =>
+                                    onPlayCurrencyChange(checked ? "gp" : "ape")
+                                }
+                            />
+                            <span
+                                className={
+                                    playCurrency === "gp"
+                                        ? "font-semibold text-[#C9FFF3]"
+                                        : "text-[#8AD9E8]"
+                                }
+                            >
+                                GP
+                            </span>
+                        </div>
                         {/* place your bet button - mobile */}
                         <Button
                             onClick={onPlay}
@@ -345,6 +362,8 @@ const MyGameSetupCard: React.FC<MyGameSetupCardProps> = ({
                                 setUsdMode={setUsdMode}
                                 disabled={isLoading}
                                 themeColorBackground={themeColorBackground}
+                                balanceUnitLabel={tokenLabel}
+                                currencyToken={playCurrency}
                             />
                         </div>
 
@@ -424,15 +443,13 @@ const MyGameSetupCard: React.FC<MyGameSetupCardProps> = ({
                                         </Tooltip>
                                     </TooltipProvider>
                                 </div>
-                                <p className="text-right">{getMaxProfitString()}</p>
+                                <AmountValue>{getMaxProfitString()}</AmountValue>
                             </div>
                             <div className="w-full flex justify-between items-center gap-2">
                                 <div className="flex items-center gap-2">
                                     <p>Max Bet Per Game</p>
                                 </div>
-                                <p className="text-right">
-                                    {maxBet.toLocaleString([], { maximumFractionDigits: 0 })} APE
-                                </p>
+                                <AmountValue>{getMaxBetText()}</AmountValue>
                             </div>
                         </div>
 
