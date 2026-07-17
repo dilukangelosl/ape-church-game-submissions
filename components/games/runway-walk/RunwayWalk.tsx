@@ -317,6 +317,11 @@ const RunwayWalkComponent: React.FC<RunwayWalkProps> = ({ game: gameProp }) => {
         maxBet: 100,
         onPlay: async () => await playGame(),
         onCashOut: cashOut,
+        onPlayAgain: handlePlayAgain,
+        onReset: () => handleReset(false),
+        onRewatch: handleRewatch,
+        playAgainText: "Play Again",
+        payout: gameState.payout,
     };
 
     const gameWindowContent = (
@@ -343,7 +348,8 @@ const RunwayWalkComponent: React.FC<RunwayWalkProps> = ({ game: gameProp }) => {
 
     return (
         <div>
-            <div className="flex flex-col lg:flex-row gap-4 sm:gap-8 lg:gap-10">
+            <div className="flex flex-col lg:flex-row lg:items-stretch gap-4 sm:gap-8 lg:gap-10">
+                <div className="min-w-0 w-full h-full lg:basis-2/3 lg:self-stretch">
                 <GameWindow
                     game={game}
                     currentGameId={currentGameId}
@@ -363,8 +369,11 @@ const RunwayWalkComponent: React.FC<RunwayWalkProps> = ({ game: gameProp }) => {
                 >
                     {gameWindowContent}
                 </GameWindow>
+                </div>
 
+                <div className="flex min-w-0 w-full flex-col lg:basis-1/3 lg:min-h-0 lg:self-stretch">
                 <RunwayWalkSetupCard {...setupCardProps} placement="sidebar" />
+                </div>
             </div>
         </div>
     );
