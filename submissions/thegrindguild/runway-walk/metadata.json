@@ -1,0 +1,36 @@
+{
+  "team": "thegrindguild",
+  "gameName": "runway-walk",
+  "displayTitle": "Koda Pageant Runway Walk",
+  "description": "Walk the runway one step at a time. Pick 1 of 5 tiles each step — land 3+ matching tiles in a row for a streak bonus, or cash out anytime before you stumble.",
+  "authors": [
+    {
+      "name": "CDNHODLer",
+      "telegram": "CDNHODLer"
+    }
+  ],
+  "revenueShare": [
+    {
+      "name": "CDNHODLer",
+      "telegram": "CDNHODLer",
+      "address": "0xd5cd731d196226cd4f80fa91dab28f5d53ab8264",
+      "share": 100
+    }
+  ],
+  "status": "pending",
+  "category": "arcade",
+  "tags": [
+    "mines",
+    "streak",
+    "nft",
+    "koda"
+  ],
+  "thumbnail": "/runway-walk/card.png",
+  "banner": "/runway-walk/banner.png",
+  "mainComponent": "RunwayWalk.tsx",
+  "windowComponent": "RunwayWalkWindow.tsx",
+  "setupComponent": "RunwayWalkSetupCard.tsx",
+  "configFile": "runwayWalkConfig.ts",
+  "version": "1.0.0",
+  "submittedAt": "2026-07-17"
+}
