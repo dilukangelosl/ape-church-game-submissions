@@ -1359,3 +1359,107 @@ button[title="Unmute music"] {
         bottom: auto !important;
     }
 }
+
+/* ─────────────────────────────────────────────────────────────────────
+   BIG WIN SPLASH
+   Celebrates big-payoff moments at spin-end. Overlays the vending
+   machine display area (bonus-frame bounds) with a dimmed backdrop +
+   zombie art that rises from below + themed text over the head-room.
+   Non-interactive so the SPIN button underneath remains pressable on
+   non-final spins (that's how the splash dismisses there); final spins
+   dismiss via the 2s parent-side timer.
+   ───────────────────────────────────────────────────────────────────── */
+.sa-big-win-splash {
+    /* Confined to the vending machine display area (bonus-frame bounds)
+       so the celebration lives inside the game board, not the whole frame.
+       Bottom-aligned so the art's base sits flush with the bottom of the
+       bonus frame; the empty head-room in the art gets the tier text. */
+    position: absolute;
+    left: calc(25% + 98px);
+    right: calc(42% - 95px);
+    top: calc(39% - 68px);
+    bottom: calc(20% + 74px);
+    z-index: 30;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    pointer-events: none;
+    overflow: hidden;
+    background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.65) 30%, rgba(0, 0, 0, 1) 100%);
+    animation: sa-big-win-in 0.35s ease-out both;
+}
+
+.sa-big-win-content {
+    /* ~80% width leaves breathing room on the sides and shrinks the art
+       ~20% from the full vending area, per the design ask.
+       Rise-from-below animation — the splash's overflow: hidden clips
+       the sub-frame portion so the zombie appears to emerge up out of
+       the vending machine floor, like rising from the dead inside it. */
+    position: relative;
+    width: 80%;
+    max-height: 100%;
+    animation: sa-big-win-art-rise 0.65s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.sa-big-win-art {
+    width: 100%;
+    height: auto;
+    display: block;
+    filter: drop-shadow(0 4px 16px rgba(0, 0, 0, 0.6));
+}
+
+.sa-big-win-text {
+    position: absolute;
+    /* Shifted up ~25px from the previous 6% baseline so the top line
+       sits near the top of the vending frame with a small breathing gap
+       (avoids feeling top-justified). calc lets the % part still respond
+       to art height while the fixed offset gives a consistent visual shift. */
+    top: calc(6% - 25px);
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: 'Press Start 2P', monospace;
+    /* Two-line layout relaxes the horizontal budget, so the font can grow.
+       Clamp keeps it readable at both narrow (mobile scaler) and wide viewports. */
+    font-size: clamp(1.125rem, 2.5vw, 2.7rem);
+    line-height: 1.2;
+    letter-spacing: 0.05em;
+    text-align: center;
+    white-space: nowrap;
+    color: #ffffff;
+    animation: sa-big-win-text-in 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+    /* Delayed so the zombie is nearly risen when the tier text pops in. */
+    animation-delay: 0.4s;
+    text-shadow:
+        0 0 4px currentColor,
+        0 0 10px currentColor,
+        3px 3px 0 rgba(0, 0, 0, 0.9);
+}
+
+/* Per-tier color theming — currentColor drives the glow */
+.sa-big-win-bigWin .sa-big-win-text {
+    color: #39FF14;  /* neon green — matches the rolling spin-total payout text */
+}
+.sa-big-win-feast .sa-big-win-text {
+    color: #DC2626;  /* red — matches SNACK ATTACK meter text + attack frame */
+    /* ZOMBIE/FEAST! is shorter than OVERTIME/MASSACRE! so the base clamp
+       (sized to fit the longest tier) leaves slack for a small bump. */
+    font-size: calc(clamp(1.125rem, 2.5vw, 2.7rem) + 2px);
+}
+.sa-big-win-massacre .sa-big-win-text {
+    color: #a855f7;  /* purple — matches RELEASED!! meter text + bonus frame */
+}
+
+@keyframes sa-big-win-in {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+@keyframes sa-big-win-art-rise {
+    from { transform: translateY(100%); }
+    to   { transform: translateY(0); }
+}
+
+@keyframes sa-big-win-text-in {
+    from { opacity: 0; transform: translate(-50%, -24px) scale(0.65); }
+    to   { opacity: 1; transform: translate(-50%, 0) scale(1); }
+}

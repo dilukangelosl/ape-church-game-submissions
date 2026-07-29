@@ -182,6 +182,36 @@ export function calculateBonusMultiplier(workerCount: number): number {
     return 1 + (workerCount * 0.5);
 }
 
+// --- Big Win Thresholds ---
+// Big-win splash trigger tiers, in ascending drama:
+//   "bigWin"   → non-bonus spin whose total meets BIG_WIN_WAGER_MULTIPLE
+//   "feast"    → bonus round with 1..BONUS_MASSACRE_WORKER_THRESHOLD-1 workers found
+//   "massacre" → bonus round with BONUS_MASSACRE_WORKER_THRESHOLD+ workers found
+// Gated on worker COUNT (not multiplier) so the massacre threshold survives
+// any future re-tuning of calculateBonusMultiplier.
+export const BIG_WIN_WAGER_MULTIPLE = 2;
+export const BONUS_MASSACRE_WORKER_THRESHOLD = 6;
+
+export type BigWinLevel = "bigWin" | "feast" | "massacre";
+
+export function computeBigWinLevel(args: {
+    isBonusRound: boolean;
+    bonusWorkersFound: number;
+    spinTotalApe: number;
+    perSpinWager: number;
+}): BigWinLevel | null {
+    const { isBonusRound, bonusWorkersFound, spinTotalApe, perSpinWager } = args;
+    if (isBonusRound) {
+        if (bonusWorkersFound >= BONUS_MASSACRE_WORKER_THRESHOLD) return "massacre";
+        if (bonusWorkersFound >= 1) return "feast";
+        return null;
+    }
+    if (perSpinWager > 0 && spinTotalApe >= BIG_WIN_WAGER_MULTIPLE * perSpinWager) {
+        return "bigWin";
+    }
+    return null;
+}
+
 // --- Game State Types ---
 export interface CellState {
     symbolId: number;
@@ -224,6 +254,10 @@ export interface OvertimeZombieGameState {
     // ("+250") during a cascade or a kick message ("Kick the Machine!") when a
     // kick fires. Cleared on the next restock / new spin / bonus entry.
     floatingPayoff: FloatingPayoff | null;
+    // Big-win splash tier for the current spin. Set at spin-end when the
+    // payout crosses the tier threshold; cleared on next spin (INITIAL_GAME_STATE
+    // spread in handleStateAdvance) or, on final spins, after the 2s hold.
+    bigWinLevel: BigWinLevel | null;
 }
 
 export type FloatingPayoff =
@@ -251,6 +285,7 @@ export const INITIAL_GAME_STATE: OvertimeZombieGameState = {
     revealScanIndex: -1,
     revealHighlightCell: null,
     floatingPayoff: null,
+    bigWinLevel: null,
 };
 
 // --- Board Logic ---

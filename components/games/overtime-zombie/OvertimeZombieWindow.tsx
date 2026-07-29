@@ -3,7 +3,7 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Game } from "@/lib/games";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { CellState, FloatingPayoff, METER_STAGE_THRESHOLD, formatApe, formatApeCompact, formatApeFull } from "./overtimeZombieConfig";
+import { BigWinLevel, CellState, FloatingPayoff, METER_STAGE_THRESHOLD, formatApe, formatApeCompact, formatApeFull } from "./overtimeZombieConfig";
 import Board from "./Board";
 import ProgressBar from "./ProgressBar";
 import PayTableModal from "./PayTableModal";
@@ -38,6 +38,7 @@ interface OvertimeZombieWindowProps {
     revealScanIndex: number;
     revealHighlightCell: [number, number] | null;
     floatingPayoff: FloatingPayoff | null;
+    bigWinLevel: BigWinLevel | null;
     // Spin + stats wiring
     onSpin: () => void;
     canSpin: boolean;
@@ -67,6 +68,7 @@ const OvertimeZombieWindow: React.FC<OvertimeZombieWindowProps> = ({
     revealScanIndex,
     revealHighlightCell,
     floatingPayoff,
+    bigWinLevel,
     onSpin,
     canSpin,
     betAmount,
@@ -198,7 +200,7 @@ const OvertimeZombieWindow: React.FC<OvertimeZombieWindowProps> = ({
                     <div
                         key={src}
                         className="sa-bg-layer"
-                        data-active={!isBonusBg && i + 1 === activeStage}
+                        data-active={!isBonusBg && i + 1 <= activeStage}
                         style={{ backgroundImage: `url(${src})` }}
                     />
                 ))}
@@ -373,6 +375,34 @@ const OvertimeZombieWindow: React.FC<OvertimeZombieWindowProps> = ({
             >
                 <img src="/submissions/overtime-zombie/infoButton.webp" alt="Info" />
             </button>
+
+            {/* Big-win splash — celebrates thresholds set at spin end.
+                Renders over the game frame (not full window) so the asset's
+                zombie art sits in the vending machine display area. Text
+                positioned over the zombie's head, themed by tier:
+                  bigWin (non-bonus 2x+ wager)   → neon green
+                  feast (bonus, 1-5 workers)     → red
+                  massacre (bonus, 6+ workers)   → purple
+                Auto-dismisses after 2s on final spins (parent clears
+                bigWinLevel from the end-of-game effect); on non-final spins
+                it holds until the SPIN press (INITIAL_GAME_STATE spread in
+                handleStateAdvance clears it). */}
+            {bigWinLevel !== null && (
+                <div className={`sa-big-win-splash sa-big-win-${bigWinLevel}`}>
+                    <div className="sa-big-win-content">
+                        <img
+                            src="/submissions/overtime-zombie/BigWinArt.webp"
+                            alt=""
+                            className="sa-big-win-art"
+                        />
+                        <span className="sa-big-win-text">
+                            {bigWinLevel === "bigWin" && <>BIG<br />WIN!</>}
+                            {bigWinLevel === "feast" && <>ZOMBIE<br />FEAST!</>}
+                            {bigWinLevel === "massacre" && <>OVERTIME<br />MASSACRE!</>}
+                        </span>
+                    </div>
+                </div>
+            )}
 
             <PayTableModal isOpen={showPayTable} onClose={() => { playSound("closeInfo"); setShowPayTable(false); }} />
         </div>
