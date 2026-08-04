@@ -6,6 +6,20 @@ export interface GameAuthor {
     telegram: string
 }
 
+/**
+ * Desktop layout a game was built for. Mirrors `GameLayout` in
+ * ape-church-game-template's myGameConfig.ts.
+ *
+ * "hud" is the current standard: the game renders its own GameHud frame, which
+ * draws the title bar, so the preview route drops its duplicate <h1> and
+ * widens the container.
+ *
+ * OPTIONAL and absent from every game submitted before the HUD existed —
+ * `undefined` means the legacy layout, which must keep rendering exactly as it
+ * always has. Never make this required.
+ */
+export type GameLayout = 'hud' | 'two-column' | 'full-size'
+
 export interface GameMetadata {
     team: string
     gameName: string
@@ -23,6 +37,8 @@ export interface GameMetadata {
     setupComponent: string
     submittedAt: string
     approvedAt?: string
+    /** See GameLayout. Absent on every pre-HUD submission — treat as legacy. */
+    layout?: GameLayout
 }
 
 export async function getAllGameMetadata(): Promise<GameMetadata[]> {

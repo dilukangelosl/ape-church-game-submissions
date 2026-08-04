@@ -73,6 +73,25 @@
   --sidebar-border: oklch(0.22 0.0143 239.37);
 
   --sidebar-ring: oklch(0.556 0 0);
+
+  /* GAME HUD STAGE
+     Backs GameHud's stage height for games submitted on the "hud" layout.
+
+     min/max are IDENTICAL to production and to ape-church-game-template, so a
+     submitted game is previewed at the real stage bounds.
+
+     The offset differs on purpose: production stacks only a NavTop above the
+     frame, whereas this preview route also renders review chrome (back link +
+     author/version line) that a player never sees. 250px keeps the frame on
+     screen for reviewers:
+       container md:pt-20 (80) + back link & margin (36)
+       + author/version line & margin (44) + frame border (3)
+       + HUD title bar (40) + its rule (1) + ~46 slack.
+     The duplicate page <h1> is dropped for hud games (see the game route
+     layout) — the HUD draws the title itself. */
+  --game-hud-stage-offset: 250px;
+  --game-hud-stage-min: 560px;
+  --game-hud-stage-max: 900px;
 }
 
 @theme inline {

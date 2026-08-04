@@ -114,6 +114,28 @@ Your `metadata.json` was copied over from the template in the previous step. Ope
 - `revenueShare` is filled out with correct names, telegram usernames, and ERC-20 addresses
 - All `share` values add up to exactly 100
 - `address` must be a valid ERC-20 address to receive Ape Coin — double-check this carefully, payments are sent to this address automatically
+- `layout` is `"hud"` if your game is built on the Game HUD (see below)
+
+---
+
+### Step 4b — Declare your layout
+
+If your game is built on the **Game HUD** — the platform's standard desktop layout, and what the template ships by default — add this to `metadata.json`:
+
+```json
+"layout": "hud"
+```
+
+That tells the preview site your game draws its own framed HUD with a title bar in it, so this site drops its duplicate page title and widens the container to give the stage its full production width.
+
+The field is **optional**. Leave it out and your game renders in the legacy layout exactly as before — every game submitted before the HUD existed does this and nothing about them changed. Valid values are `hud`, `two-column` and `full-size`; the latter two are legacy and will produce a warning on your PR asking you to explain why the HUD doesn't fit.
+
+One thing to keep in sync: on the HUD the title comes from **your game config** (the `title` you pass to `GameHud`, normally `game.title`), not from `displayTitle` in `metadata.json` — the same as on the live platform. Make the two match, or reviewers will see a different name in the frame than on the submissions index.
+
+Your game ports across unchanged: `components/shared/GameHud.tsx` here is API-identical to the template's, and `hudMode` is supported on both `GameWindow` and `WideGameWindow`. The one thing to check is that you import shared components with the `@/` alias — `import GameHud from '@/components/shared/GameHud'`, never `'../shared/GameHud'`, which stops resolving once your folder moves under `components/games/`.
+
+The full layout spec is `docs/GAME-HUD.md` in the template repo.
+
 ---
 
 ### Step 5 — Open a Pull Request

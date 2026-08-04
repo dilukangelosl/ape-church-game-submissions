@@ -187,6 +187,26 @@ jobs:
               ;;
           esac
 
+          # layout is OPTIONAL — absent means the legacy layout (every game
+          # submitted before the HUD existed). When present it must be valid.
+          LAYOUT=$(jq -r '.layout // empty' "$METADATA")
+          if [ -z "$LAYOUT" ]; then
+            echo "✓ layout not set (legacy layout)"
+          else
+            case "$LAYOUT" in
+              hud)
+                echo "✓ layout = hud"
+                ;;
+              two-column|full-size)
+                echo "::warning::layout is \"$LAYOUT\" — the HUD (\"hud\") is the standard layout for new games. Make sure your submission explains why it can't be used."
+                ;;
+              *)
+                echo "::error::layout must be one of: hud, two-column, full-size — got \"$LAYOUT\""
+                FAIL=1
+                ;;
+            esac
+          fi
+
           # tags must be a non-empty array
           TAG_COUNT=$(jq '.tags | if type == "array" then length else 0 end' "$METADATA")
           if [ "$TAG_COUNT" -eq 0 ]; then
