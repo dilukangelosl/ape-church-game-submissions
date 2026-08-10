@@ -25,6 +25,7 @@ import {
     markKickShoes,
     markAllForDrop,
     calculateBonusMultiplier,
+    computeBigWinLevel,
     WORKER_SYMBOL_ID,
     SHOE_SYMBOL_ID,
     ROWS,
@@ -162,12 +163,19 @@ const OvertimeZombieComponent: React.FC<OvertimeZombieComponentProps> = ({ game 
         ) {
             // Brief pause so the player registers "spin's over" before the
             // modal flies in. Tuned tight since the modal has its own spring
-            // entrance + delayed win/gameover SFX on top.
+            // entrance + delayed win/gameover SFX on top. When a big-win splash
+            // is showing, extend the delay to 2s so the splash gets its full
+            // hold before the modal takes over; then clear bigWinLevel so the
+            // splash dismisses cleanly instead of lingering under the modal.
+            const holdMs = gameState.bigWinLevel !== null ? 2000 : 300;
             const timeout = setTimeout(() => {
                 setPayout((prev) => prev ?? 0);
                 setCurrentView(2);
                 setGameOver(true);
-            }, 300);
+                if (gameState.bigWinLevel !== null) {
+                    setGameState((prev) => ({ ...prev, bigWinLevel: null }));
+                }
+            }, holdMs);
             return () => clearTimeout(timeout);
         }
     }, [
@@ -177,6 +185,7 @@ const OvertimeZombieComponent: React.FC<OvertimeZombieComponentProps> = ({ game 
         gameState.isAnimating,
         gameState.isCascading,
         gameState.isRevealingWorkers,
+        gameState.bigWinLevel,
     ]);
 
     // Win / gameOver fanfare — fires as the "You Won!" / "Try Again!" text
@@ -287,7 +296,23 @@ const OvertimeZombieComponent: React.FC<OvertimeZombieComponentProps> = ({ game 
             if (apeToAward > 0) {
                 setPayout((p) => (p ?? 0) + apeToAward);
             }
+            const perSpinWager = numberOfSpins > 0 ? betAmount / numberOfSpins : betAmount;
+            const bigWinLevel = computeBigWinLevel({
+                isBonusRound: false,
+                bonusWorkersFound: 0,
+                spinTotalApe: apeToAward,
+                perSpinWager,
+            });
+            // Rollup stays visible even on big-win spins — the splash is
+            // constrained to the vending display area, so the rollup float
+            // (which sits below the meter, outside the splash bounds) remains
+            // readable and gives the player the final number for the spin.
             const showSpinTotal = spinsRemaining > 0;
+            if (bigWinLevel !== null) {
+                // Growl is the "moment" sound for the big-win splash; the
+                // rollup below plays its usual win/gameOver chime alongside.
+                playSoundInstant("bonusRound");
+            }
             if (showSpinTotal) {
                 // Win / no-win fanfare paired with the spin-total rollup.
                 // Final-spin results modal has its own delayed fanfare elsewhere.
@@ -301,6 +326,7 @@ const OvertimeZombieComponent: React.FC<OvertimeZombieComponentProps> = ({ game 
                 isKicking: false,
                 totalPayoutThisSpin: 0,
                 floatingPayoff: showSpinTotal ? { type: "spinTotal", value: apeToAward } : null,
+                bigWinLevel,
             }));
             return;
         }
@@ -606,9 +632,23 @@ const OvertimeZombieComponent: React.FC<OvertimeZombieComponentProps> = ({ game 
             const spinCascadeApe = state.totalPayoutThisSpin;
             const finalPayout = spinCascadeApe * multiplier;
 
+            const perSpinWager = numberOfSpins > 0 ? betAmount / numberOfSpins : betAmount;
+            const bigWinLevel = computeBigWinLevel({
+                isBonusRound: true,
+                bonusWorkersFound,
+                spinTotalApe: finalPayout,
+                perSpinWager,
+            });
             // Skip the spin-total rollup on the FINAL spin so the game-results
             // modal isn't interrupted by a brief flash of the float.
             const showSpinTotal = spinsRemaining > 0;
+            if (bigWinLevel !== null) {
+                // Growl is the "moment" sound for the big-win splash.
+                // finishBonusRound already fired the growl at scan start, but by
+                // scan end (30 cells × timing) enough time has passed that a
+                // second growl here reads as the spin-end beat, not a repeat.
+                playSoundInstant("bonusRound");
+            }
             if (showSpinTotal) {
                 // Win / no-win fanfare paired with the spin-total rollup so the
                 // spin-end isn't silent. Final-spin uses the modal's own delayed
@@ -623,6 +663,7 @@ const OvertimeZombieComponent: React.FC<OvertimeZombieComponentProps> = ({ game 
                 spinComplete: true,
                 totalPayoutThisSpin: 0,
                 floatingPayoff: showSpinTotal ? { type: "spinTotal", value: finalPayout } : null,
+                bigWinLevel,
             };
 
             setGameState(finalState);
@@ -949,6 +990,7 @@ const OvertimeZombieComponent: React.FC<OvertimeZombieComponentProps> = ({ game 
                         revealScanIndex={gameState.revealScanIndex}
                         revealHighlightCell={gameState.revealHighlightCell}
                         floatingPayoff={gameState.floatingPayoff}
+                        bigWinLevel={gameState.bigWinLevel}
                         onSpin={handleStateAdvance}
                         canSpin={
                             currentView === 1
