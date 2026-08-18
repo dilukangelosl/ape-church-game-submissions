@@ -17,6 +17,8 @@ import { Info } from 'lucide-react';
 import { Game } from '@/lib/games';
 import BetAmountInput from '@/components/shared/BetAmountInput';
 import { CustomSlider } from '@/components/shared/CustomSlider';
+import { HUD_PANEL_CARD_CLASS } from '@/components/shared/GameHud';
+import { cn } from '@/lib/utils';
 import Paytable from './slot/Paytable';
 import { GamePhase } from './types';
 
@@ -157,7 +159,7 @@ const MyGameSetupCard: React.FC<MyGameSetupCardProps> = ({
     <>
       {showPaytable && <Paytable onClose={() => setShowPaytable(false)} />}
 
-      <Card className="w-full h-full min-h-[400px] lg:min-h-0 p-6 flex flex-col">
+      <Card className={cn('w-full h-full min-h-[400px] p-6 flex flex-col', HUD_PANEL_CARD_CLASS)}>
         {currentView === 0 && (
           <>
             <CardContent className="font-roboto">

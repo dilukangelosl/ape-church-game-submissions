@@ -26,6 +26,7 @@
   "windowComponent": "MyGameWindow.tsx",
   "setupComponent": "MyGameSetupCard.tsx",
   "configFile": "myGameConfig.ts",
-  "version": "1.0.0",
+  "layout": "hud",
+  "version": "1.1.0",
   "submittedAt": "2026-05-29"
 }

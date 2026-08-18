@@ -91,19 +91,8 @@ function emittersFor(level: WinLevel, W: number, H: number): P[] {
     lifeFn: () => rand(0.5, 1.2),
   });
 
-  // Coin-like disc (wide, slow)
-  const coins = (count: number): void => emit({
-    count,
-    ox: () => rand(0.1, 0.9),
-    oy: () => rand(0.0, 0.2),
-    vxFn:  () => rand(-60, 60),
-    vyFn:  () => rand(50, 180),
-    axFn:  () => rand(-20, 20),
-    ayFn:  () => 180,
-    colorFn: () => [1, 0.82, 0.1],
-    sizeFn: () => rand(6, 14),
-    lifeFn: () => rand(0.8, 1.8),
-  });
+  // (Coin rain is handled by the DOM-based CoinShower — branded tiger coins
+  //  that actually flip, which point sprites can't.)
 
   // Blue/cyan swirl for free spins
   const freeSpinSwirl = (count: number): void => emit({
@@ -138,7 +127,6 @@ function emittersFor(level: WinLevel, W: number, H: number): P[] {
       flashBurst(180, 380);
       goldSparkle(120, 0.3, 0.5);
       goldSparkle(120, 0.7, 0.5);
-      coins(40);
       break;
 
     case 'jackpot':
@@ -146,7 +134,6 @@ function emittersFor(level: WinLevel, W: number, H: number): P[] {
       goldSparkle(150, 0.25, 0.5);
       goldSparkle(150, 0.5,  0.4);
       goldSparkle(150, 0.75, 0.5);
-      coins(80);
       break;
 
     case 'freespins':

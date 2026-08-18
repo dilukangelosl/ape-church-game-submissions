@@ -7,6 +7,7 @@ import { bytesToHex, Hex } from 'viem';
 import { toast, Toaster } from 'sonner';
 
 import GameWindow from '@/components/shared/GameWindow';
+import GameHud from '@/components/shared/GameHud';
 import MyGameWindow from './MyGameWindow';
 import MyGameSetupCard from './MyGameSetupCard';
 
@@ -365,10 +366,39 @@ const MyGameInner = () => {
         }}
       />
 
-      {/* lg:min-h locks the row so view changes in SetupCard cannot reflow the GameWindow height */}
-      <div className="flex flex-col lg:flex-row lg:items-stretch gap-4 sm:gap-8 lg:gap-10 lg:min-h-[600px]">
-        <div className="w-full min-h-[400px] lg:min-h-0 lg:basis-2/3 lg:relative self-stretch">
-        <div className="lg:absolute lg:inset-0">
+      <GameHud
+        title={game.title}
+        panel={
+          <MyGameSetupCard
+            game={game}
+            onPlay={async () => await playGame()}
+            onSpin={handleStateAdvance}
+            onRewatch={handleRewatch}
+            onReset={() => handleReset(false)}
+            onPlayAgain={async () => await handlePlayAgain()}
+            playAgainText={playAgainText}
+            currentView={currentView}
+            betAmount={betAmount}
+            setBetAmount={setBetAmount}
+            numberOfSpins={numberOfSpins}
+            setNumberOfSpins={setNumberOfSpins}
+            isLoading={isLoading}
+            payout={payout}
+            spinsLeft={getSpinsLeft()}
+            jackpotMultiplier={jackpotMultiplier}
+            inReplayMode={replayIdString !== null}
+            account={undefined}
+            walletBalance={walletBalance}
+            playerAddress={undefined}
+            isGamePaused={false}
+            profile={undefined}
+            minBet={1}
+            maxBet={100}
+            freeSpinsRemaining={gameState.freeSpinsRemaining}
+            phase={gameState.phase}
+          />
+        }
+      >
         <GameWindow
           game={game}
           currentGameId={currentGameId}
@@ -386,6 +416,7 @@ const MyGameInner = () => {
           isGamePaused={false}
           resultModalDelayMs={1000}
           customHeightMobile="400px"
+          hudMode
         >
           <MyGameWindow
             game={game}
@@ -396,40 +427,7 @@ const MyGameInner = () => {
             betPerLine={betPerLine}
           />
         </GameWindow>
-        </div>
-        </div>
-
-        <div className="w-full min-h-[400px] lg:min-h-0 lg:basis-1/3 flex flex-col self-stretch">
-        <MyGameSetupCard
-          game={game}
-          onPlay={async () => await playGame()}
-          onSpin={handleStateAdvance}
-          onRewatch={handleRewatch}
-          onReset={() => handleReset(false)}
-          onPlayAgain={async () => await handlePlayAgain()}
-          playAgainText={playAgainText}
-          currentView={currentView}
-          betAmount={betAmount}
-          setBetAmount={setBetAmount}
-          numberOfSpins={numberOfSpins}
-          setNumberOfSpins={setNumberOfSpins}
-          isLoading={isLoading}
-          payout={payout}
-          spinsLeft={getSpinsLeft()}
-          jackpotMultiplier={jackpotMultiplier}
-          inReplayMode={replayIdString !== null}
-          account={undefined}
-          walletBalance={walletBalance}
-          playerAddress={undefined}
-          isGamePaused={false}
-          profile={undefined}
-          minBet={1}
-          maxBet={100}
-          freeSpinsRemaining={gameState.freeSpinsRemaining}
-          phase={gameState.phase}
-        />
-        </div>
-      </div>
+      </GameHud>
     </div>
   );
 };

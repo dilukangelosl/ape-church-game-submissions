@@ -9,6 +9,7 @@ import { ALL_SYMBOL_IDS, NUM_REELS, NUM_ROWS, NUM_PAYLINES } from './myGameConfi
 import ReelStrip from './slot/ReelStrip';
 import GlowBorder from './slot/GlowBorder';
 import WinParticles, { WinLevel } from './slot/WinParticles';
+import CoinShower from './slot/CoinShower';
 import FreeSpinsIntro from './slot/FreeSpinsIntro';
 
 interface MyGameWindowProps {
@@ -215,20 +216,36 @@ export default function MyGameWindow({
 
   const isSpinningAny = spinning.some(Boolean);
 
-  // Win counter label styling by level
-  const winLabelMap: Record<NonNullable<WinLevel>, { label: string; color: string; glow: string; scale: string }> = {
-    small:    { label: 'Winner',   color: '#FFD700', glow: '#FFD700',  scale: 'text-3xl' },
-    big:      { label: 'Big Win',  color: '#FFD700', glow: '#FF8C00',  scale: 'text-5xl' },
-    mega:     { label: 'Mega Win', color: '#FFD700', glow: '#FF4500',  scale: 'text-6xl' },
-    jackpot:  { label: 'Jackpot',  color: '#FFD700', glow: '#FF2200',  scale: 'text-7xl' },
-    freespins:{ label: 'Free Spins!', color: '#00CFFF', glow: '#007FFF', scale: 'text-5xl' },
+  // Branded win banner art + accent glow per level (banners generated in the
+  // Legend of the Gold Cub logo style — carved stone, gold letters, gems)
+  const winStyleMap: Record<NonNullable<WinLevel>, { banner: string; glow: string; width: string }> = {
+    small:    { banner: '/submissions/legend-of-the-gold-cub/win/win.webp',      glow: '#FFD700', width: 'min(48%, 300px)' },
+    big:      { banner: '/submissions/legend-of-the-gold-cub/win/big-win.webp',  glow: '#FF8C00', width: 'min(64%, 440px)' },
+    mega:     { banner: '/submissions/legend-of-the-gold-cub/win/mega-win.webp', glow: '#FF4500', width: 'min(74%, 530px)' },
+    jackpot:  { banner: '/submissions/legend-of-the-gold-cub/win/jackpot.webp',  glow: '#FF2200', width: 'min(82%, 590px)' },
+    freespins:{ banner: '/submissions/legend-of-the-gold-cub/win/win.webp',      glow: '#00CFFF', width: 'min(54%, 340px)' },
   };
+  const isBigWin = winLevel === 'big' || winLevel === 'mega' || winLevel === 'jackpot';
 
   return (
     <div
-      className="absolute inset-0 z-0 flex flex-col items-center justify-center select-none overflow-hidden px-2 sm:px-4 lg:px-7"
+      // container-type:size lets the play column cap its width off the HUD
+      // stage's *height* (cqh) so the reels never outgrow a short wide stage.
+      className="absolute inset-0 z-0 flex flex-col items-center justify-center select-none overflow-hidden px-2 sm:px-4 lg:px-7 lg:[container-type:size]"
       onClick={handleScreenTap}
     >
+
+      {/* Full-res background. The shared GameWindow serves its copy through
+          next/Image at width=719, which blurs when stretched across the wide
+          HUD stage — so we paint the 2560×1440 master ourselves. object-cover
+          center keeps the safe-square content visible at every aspect, down
+          to the 1:1 mobile crop. */}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={game.gameBackground}
+        alt=""
+        className="absolute inset-0 w-full h-full object-cover pointer-events-none"
+      />
 
       {/* Screen flash overlay — fires on big/mega/jackpot */}
       <div
@@ -242,6 +259,15 @@ export default function MyGameWindow({
 
       {/* Three.js particle system — active during WIN_DISPLAY */}
       <WinParticles winLevel={gameState.phase === 'WIN_DISPLAY' ? winLevel : null} />
+
+      {/* Branded tiger-coin shower — falls with the win display */}
+      <CoinShower winLevel={gameState.phase === 'WIN_DISPLAY' ? winLevel : null} />
+
+      {/* Play column: logo + reels. On the wide HUD stage its width is capped by
+          the stage height (logo ≈ 0.24×width, grid ≈ 0.6×width + chrome) so the
+          whole column always fits vertically, centered with background flanking
+          it on wide monitors. Below lg it is simply full width, as before. */}
+      <div className="relative z-10 w-full flex flex-col items-center lg:max-w-[min(100%,880px,calc((100cqh_-_260px)*1.55))]">
 
       {/* Game logo — responsive sizing */}
       <div className="relative z-10 w-full flex justify-center mb-1 sm:mb-2 pointer-events-none">
@@ -309,11 +335,6 @@ export default function MyGameWindow({
         </div>
       )}
 
-      {/* Free Spins Intro — Three.js particle burst */}
-      {gameState.phase === 'FREE_SPINS_INTRO' && (
-        <FreeSpinsIntro spinsAwarded={gameState.freeSpinsRemaining} />
-      )}
-
       {/* ── Reel Grid — near full width of game window ── */}
       <div
         className="relative z-10 flex gap-1 sm:gap-2 p-2 sm:p-3 lg:p-[14px_16px]"
@@ -355,6 +376,14 @@ export default function MyGameWindow({
           style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.5), transparent)' }} />
       </div>
 
+      </div>{/* /play column */}
+
+      {/* Free Spins Intro — Three.js particle burst (full-stage overlay, must
+          stay outside the width-capped play column) */}
+      {gameState.phase === 'FREE_SPINS_INTRO' && (
+        <FreeSpinsIntro spinsAwarded={gameState.freeSpinsRemaining} />
+      )}
+
       <style>{`
         @keyframes gridShimmer {
           0%   { transform: translateX(-120%); opacity: 0; }
@@ -365,50 +394,64 @@ export default function MyGameWindow({
         }
       `}</style>
 
-      {/* ── Win Display overlay ── */}
+      {/* ── Win Display overlay — branded banner art + counter ── */}
       {showWinDisplay && winLevel && gameState.phase === 'WIN_DISPLAY' && (
-        <div
-          className="absolute inset-x-0 z-30 flex flex-col items-center justify-center pointer-events-none"
-          style={{
-            bottom: winLevel === 'jackpot' || winLevel === 'mega' ? '6%' : '3%',
-            animation: 'winPop 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275) both',
-          }}
-        >
-          {/* Backdrop panel — gives contrast against busy reel symbols */}
-          <div
-            className="px-6 sm:px-10 py-3 sm:py-4 rounded-2xl flex flex-col items-center"
-            style={{
-              background: 'linear-gradient(135deg, rgba(10,5,0,0.88) 0%, rgba(40,20,0,0.82) 100%)',
-              border: `1px solid ${winLabelMap[winLevel].glow}55`,
-              boxShadow: `0 0 24px ${winLabelMap[winLevel].glow}40, inset 0 1px 0 rgba(255,255,255,0.07)`,
-              backdropFilter: 'blur(6px)',
-            }}
-          >
-            {/* Win level label */}
-            <p
-              className={`font-black tracking-wide ${winLabelMap[winLevel].scale}`}
+        <div className="absolute inset-0 z-30 flex flex-col items-center justify-center pointer-events-none">
+          {/* Rotating treasure rays behind the banner on big wins and up */}
+          {isBigWin && (
+            <div
+              className="absolute left-1/2 top-1/2"
               style={{
-                color: winLabelMap[winLevel].color,
-                textShadow: `0 0 16px ${winLabelMap[winLevel].glow}, 0 0 32px ${winLabelMap[winLevel].glow}`,
-                fontFamily: 'Georgia, serif',
-                letterSpacing: '0.05em',
+                width: '140%',
+                aspectRatio: '1',
+                transform: 'translate(-50%, -50%)',
+                background: `repeating-conic-gradient(from 0deg, ${winStyleMap[winLevel].glow}38 0deg 11deg, transparent 11deg 26deg)`,
+                WebkitMaskImage: 'radial-gradient(circle, rgba(0,0,0,0.85) 0%, transparent 60%)',
+                maskImage: 'radial-gradient(circle, rgba(0,0,0,0.85) 0%, transparent 60%)',
+                animation: 'raySpin 12s linear infinite',
               }}
-            >
-              {winLabelMap[winLevel].label}
-            </p>
+            />
+          )}
 
-            {/* Divider */}
-            <div className="w-full my-1 sm:my-2" style={{ height: 1, background: `linear-gradient(to right, transparent, ${winLabelMap[winLevel].glow}80, transparent)` }} />
+          <div
+            className="relative flex flex-col items-center"
+            style={{ animation: 'winPop 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275) both' }}
+          >
+            {/* Banner art */}
+            <Image
+              src={winStyleMap[winLevel].banner}
+              alt={winLevel === 'small' ? 'Win' : winLevel}
+              width={1024}
+              height={512}
+              priority
+              className="object-contain h-auto"
+              style={{
+                width: winStyleMap[winLevel].width,
+                filter: `drop-shadow(0 8px 20px rgba(0,0,0,0.65)) drop-shadow(0 0 28px ${winStyleMap[winLevel].glow}59)`,
+                animation: isBigWin ? 'bannerPulse 1.8s ease-in-out infinite' : undefined,
+              }}
+            />
 
             {/* Animated APE counter */}
-            <div className="flex items-baseline gap-2">
+            <div
+              className="mt-2 sm:mt-3 px-6 sm:px-9 py-2 rounded-full flex items-baseline gap-2"
+              style={{
+                background: 'linear-gradient(135deg, rgba(14,8,0,0.86) 0%, rgba(48,26,0,0.8) 100%)',
+                border: `1.5px solid ${winStyleMap[winLevel].glow}80`,
+                boxShadow: `0 0 20px ${winStyleMap[winLevel].glow}40, inset 0 1px 0 rgba(255,255,255,0.08)`,
+                backdropFilter: 'blur(5px)',
+              }}
+            >
               <p
-                className="text-3xl sm:text-4xl lg:text-5xl font-black tabular-nums"
-                style={{ color: '#fff', textShadow: '0 2px 8px rgba(0,0,0,0.9)' }}
+                className="text-2xl sm:text-4xl lg:text-5xl font-black tabular-nums"
+                style={{
+                  color: '#FFD700',
+                  textShadow: '0 2px 6px rgba(0,0,0,0.9), 0 0 16px rgba(255,200,0,0.55)',
+                }}
               >
                 {winCounterVal.toFixed(3)}
               </p>
-              <span className="text-lg font-bold opacity-60 text-white">APE</span>
+              <span className="text-lg font-bold opacity-70 text-white">APE</span>
             </div>
 
             {/* Skip hint */}
@@ -440,6 +483,14 @@ export default function MyGameWindow({
         @keyframes winPop {
           from { opacity: 0; transform: scale(0.6); }
           to   { opacity: 1; transform: scale(1); }
+        }
+        @keyframes raySpin {
+          from { transform: translate(-50%, -50%) rotate(0deg); }
+          to   { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+        @keyframes bannerPulse {
+          0%, 100% { transform: scale(1); }
+          50%      { transform: scale(1.045); }
         }
         @keyframes fsBannerPop {
           from { opacity: 0; transform: translateX(-50%) scale(0.7); }
