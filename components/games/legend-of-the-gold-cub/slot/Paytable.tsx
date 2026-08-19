@@ -113,9 +113,9 @@ export default function Paytable({ onClose }: PaytableProps) {
             </div>
             <div className="grid grid-cols-3 gap-2">
               {[
-                { count: 3, spins: 10, pay: 2 },
-                { count: 4, spins: 15, pay: 5 },
-                { count: 5, spins: 20, pay: 20 },
+                { count: 3, spins: 4, pay: 2 },
+                { count: 4, spins: 8, pay: 5 },
+                { count: 5, spins: 12, pay: 20 },
               ].map(({ count, spins, pay }) => (
                 <div key={count} className="text-center rounded-lg py-1.5" style={{ background: 'rgba(0,0,0,0.3)' }}>
                   <p className="text-[10px] font-bold" style={{ color: 'rgba(0,212,255,0.7)' }}>{count} ×</p>

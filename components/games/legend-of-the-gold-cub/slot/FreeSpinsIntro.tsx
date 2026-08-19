@@ -170,60 +170,42 @@ export default function FreeSpinsIntro({ spinsAwarded }: FreeSpinsIntroProps) {
         {/* Top label */}
         <p
           className="text-xs sm:text-sm font-bold tracking-[0.35em] uppercase"
-          style={{ color: 'rgba(0,212,255,0.75)' }}
+          style={{ color: 'rgba(232,200,106,0.8)', textShadow: '0 1px 3px rgba(0,0,0,0.8)' }}
         >
           Golden Cubs Have Spoken
         </p>
 
-        {/* Main title */}
-        <p
-          className="font-black text-4xl sm:text-6xl lg:text-7xl tracking-widest uppercase"
+        {/* Main title — carved-gold plaque in the game's logo style */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/submissions/legend-of-the-gold-cub/win/free-spins.webp"
+          alt="Free Spins"
+          className="w-[min(78%,560px)] object-contain"
           style={{
-            color: '#FFD700',
-            textShadow: [
-              '0 0 12px #FFD700',
-              '0 0 30px #FF8C00',
-              '0 0 60px #FF4500',
-              '0 0 100px rgba(255,140,0,0.4)',
-            ].join(', '),
-            fontFamily: 'Georgia, serif',
-            letterSpacing: '0.08em',
-            animation: 'fsTextPulse 1.4s ease-in-out infinite',
+            filter: 'drop-shadow(0 8px 20px rgba(0,0,0,0.7)) drop-shadow(0 0 26px rgba(255,180,0,0.35))',
+            animation: 'fsPlaquePulse 1.6s ease-in-out infinite',
           }}
-        >
-          Free Spins
-        </p>
+        />
 
-        {/* Spin count badge */}
+        {/* Spin count — gold counter pill matching the win display */}
         <div
-          className="flex flex-col items-center justify-center mt-1"
+          className="mt-1 px-6 py-1.5 rounded-full flex items-baseline gap-2"
           style={{
-            width: 96, height: 96,
-            borderRadius: '50%',
-            background: 'radial-gradient(circle, rgba(0,212,255,0.18) 0%, rgba(0,80,120,0.12) 100%)',
-            border: '2px solid rgba(0,212,255,0.6)',
-            boxShadow: [
-              '0 0 16px rgba(0,212,255,0.6)',
-              '0 0 40px rgba(0,180,220,0.3)',
-              'inset 0 0 20px rgba(0,212,255,0.1)',
-            ].join(', '),
-            animation: 'fsBadgePulse 1.2s ease-in-out infinite',
+            background: 'linear-gradient(135deg, rgba(14,8,0,0.86) 0%, rgba(48,26,0,0.8) 100%)',
+            border: '1.5px solid rgba(212,160,23,0.8)',
+            boxShadow: '0 0 16px rgba(212,160,23,0.45), inset 0 1px 0 rgba(255,255,255,0.08)',
           }}
         >
           <span
-            className="font-black tabular-nums leading-none"
+            className="font-black tabular-nums leading-none text-4xl"
             style={{
-              fontSize: spinsAwarded >= 20 ? '2.2rem' : '2.6rem',
-              color: '#00D4FF',
-              textShadow: '0 0 12px rgba(0,212,255,0.9)',
+              color: '#FFD700',
+              textShadow: '0 2px 6px rgba(0,0,0,0.9), 0 0 14px rgba(255,200,0,0.55)',
             }}
           >
             {spinsAwarded}
           </span>
-          <span
-            className="text-[10px] font-bold tracking-widest uppercase mt-0.5"
-            style={{ color: 'rgba(0,212,255,0.7)' }}
-          >
+          <span className="text-xs font-bold tracking-widest uppercase text-white/60">
             spins
           </span>
         </div>
@@ -245,13 +227,9 @@ export default function FreeSpinsIntro({ spinsAwarded }: FreeSpinsIntroProps) {
       </div>
 
       <style>{`
-        @keyframes fsTextPulse {
-          0%, 100% { text-shadow: 0 0 12px #FFD700, 0 0 30px #FF8C00, 0 0 60px #FF4500; }
-          50%       { text-shadow: 0 0 20px #FFD700, 0 0 50px #FF8C00, 0 0 90px #FF4500, 0 0 120px rgba(255,80,0,0.5); }
-        }
-        @keyframes fsBadgePulse {
-          0%, 100% { box-shadow: 0 0 16px rgba(0,212,255,0.6), 0 0 40px rgba(0,180,220,0.3), inset 0 0 20px rgba(0,212,255,0.1); }
-          50%       { box-shadow: 0 0 28px rgba(0,212,255,0.9), 0 0 70px rgba(0,180,220,0.5), inset 0 0 30px rgba(0,212,255,0.2); }
+        @keyframes fsPlaquePulse {
+          0%, 100% { transform: scale(1); }
+          50%      { transform: scale(1.035); }
         }
       `}</style>
     </div>

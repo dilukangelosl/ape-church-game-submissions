@@ -281,60 +281,6 @@ export default function MyGameWindow({
         />
       </div>
 
-      {/* Free Spins Banner — shown while free spins are active */}
-      {gameState.freeSpinsRemaining > 0 && gameState.phase !== 'FREE_SPINS_INTRO' && (
-        <div
-          className="absolute top-2 left-1/2 -translate-x-1/2 z-20 whitespace-nowrap"
-          style={{ animation: 'fsBannerPop 0.4s cubic-bezier(0.175,0.885,0.32,1.275) both' }}
-        >
-          <div
-            className="flex items-center gap-2 px-4 py-1.5 rounded-full"
-            style={{
-              background: 'linear-gradient(135deg, rgba(0,20,30,0.95) 0%, rgba(0,40,55,0.95) 100%)',
-              border: '1.5px solid rgba(0,212,255,0.7)',
-              boxShadow: '0 0 14px rgba(0,212,255,0.5), 0 0 30px rgba(0,180,220,0.25), inset 0 0 10px rgba(0,212,255,0.06)',
-              animation: 'fsBannerGlow 1.6s ease-in-out infinite',
-            }}
-          >
-            {/* Pulsing dot */}
-            <span
-              className="inline-block rounded-full"
-              style={{
-                width: 7, height: 7,
-                background: '#00D4FF',
-                boxShadow: '0 0 6px rgba(0,212,255,0.9)',
-                animation: 'fsDotPulse 1s ease-in-out infinite',
-              }}
-            />
-            <span
-              className="text-xs font-black tracking-widest uppercase"
-              style={{ color: 'rgba(0,212,255,0.9)' }}
-            >
-              Free Spins
-            </span>
-            {/* Count badge */}
-            <span
-              className="flex items-center justify-center rounded-full font-black tabular-nums text-xs"
-              style={{
-                minWidth: 22, height: 22, padding: '0 5px',
-                background: 'rgba(0,212,255,0.15)',
-                border: '1px solid rgba(0,212,255,0.5)',
-                color: '#00D4FF',
-                textShadow: '0 0 8px rgba(0,212,255,0.9)',
-              }}
-            >
-              {gameState.freeSpinsRemaining}
-            </span>
-            <span
-              className="text-[10px] tracking-wider uppercase"
-              style={{ color: 'rgba(0,212,255,0.5)' }}
-            >
-              left
-            </span>
-          </div>
-        </div>
-      )}
-
       {/* ── Reel Grid — near full width of game window ── */}
       <div
         className="relative z-10 flex gap-1 sm:gap-2 p-2 sm:p-3 lg:p-[14px_16px]"
@@ -375,6 +321,40 @@ export default function MyGameWindow({
         <div className="absolute inset-x-0 bottom-0 h-4 pointer-events-none rounded-b-2xl"
           style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.5), transparent)' }} />
       </div>
+
+      {/* Free Spins counter — carved-gold plaque below the reels while free
+          spins run, matching the game art instead of a generic glowing pill */}
+      {gameState.freeSpinsRemaining > 0 && gameState.phase !== 'FREE_SPINS_INTRO' && (
+        <div
+          className="relative z-10 mt-2 sm:mt-3 flex items-center gap-2 sm:gap-3"
+          style={{ animation: 'winPop 0.4s cubic-bezier(0.175,0.885,0.32,1.275) both' }}
+        >
+          <Image
+            src="/submissions/legend-of-the-gold-cub/win/free-spins.webp"
+            alt="Free Spins"
+            width={1202}
+            height={260}
+            className="h-8 sm:h-10 w-auto object-contain"
+            style={{ filter: 'drop-shadow(0 3px 8px rgba(0,0,0,0.65))' }}
+          />
+          <div
+            className="px-3 sm:px-4 py-1 rounded-full flex items-baseline gap-1.5"
+            style={{
+              background: 'linear-gradient(135deg, rgba(14,8,0,0.86) 0%, rgba(48,26,0,0.8) 100%)',
+              border: '1.5px solid rgba(212,160,23,0.8)',
+              boxShadow: '0 0 14px rgba(212,160,23,0.4), inset 0 1px 0 rgba(255,255,255,0.08)',
+            }}
+          >
+            <span
+              className="text-lg sm:text-xl font-black tabular-nums"
+              style={{ color: '#FFD700', textShadow: '0 2px 5px rgba(0,0,0,0.9), 0 0 10px rgba(255,200,0,0.5)' }}
+            >
+              {gameState.freeSpinsRemaining}
+            </span>
+            <span className="text-[10px] font-bold tracking-widest uppercase text-white/55">left</span>
+          </div>
+        </div>
+      )}
 
       </div>{/* /play column */}
 
@@ -469,9 +449,11 @@ export default function MyGameWindow({
         <div
           className="absolute top-14 left-1/2 -translate-x-1/2 z-20 px-5 py-1.5 rounded-full text-sm font-bold whitespace-nowrap"
           style={{
-            background: '#0ea5e9',
-            color: '#fff',
-            boxShadow: '0 0 16px rgba(14,165,233,0.8)',
+            background: 'linear-gradient(180deg, rgba(58,37,6,0.95) 0%, rgba(36,21,3,0.95) 100%)',
+            border: '1.5px solid #D4A017',
+            color: '#FFD700',
+            textShadow: '0 1px 3px rgba(0,0,0,0.8)',
+            boxShadow: '0 0 16px rgba(212,160,23,0.5), inset 0 1px 0 rgba(255,220,120,0.25)',
             animation: 'winPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) both',
           }}
         >
@@ -491,18 +473,6 @@ export default function MyGameWindow({
         @keyframes bannerPulse {
           0%, 100% { transform: scale(1); }
           50%      { transform: scale(1.045); }
-        }
-        @keyframes fsBannerPop {
-          from { opacity: 0; transform: translateX(-50%) scale(0.7); }
-          to   { opacity: 1; transform: translateX(-50%) scale(1); }
-        }
-        @keyframes fsBannerGlow {
-          0%,100% { box-shadow: 0 0 14px rgba(0,212,255,0.5), 0 0 30px rgba(0,180,220,0.25), inset 0 0 10px rgba(0,212,255,0.06); }
-          50%     { box-shadow: 0 0 22px rgba(0,212,255,0.85), 0 0 50px rgba(0,180,220,0.45), inset 0 0 16px rgba(0,212,255,0.12); }
-        }
-        @keyframes fsDotPulse {
-          0%,100% { opacity: 1; transform: scale(1); }
-          50%     { opacity: 0.4; transform: scale(0.7); }
         }
       `}</style>
     </div>

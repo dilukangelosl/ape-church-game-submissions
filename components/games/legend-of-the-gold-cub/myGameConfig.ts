@@ -120,12 +120,13 @@ export const NUM_PAYLINES = PAYLINES.length;
 
 // ── Free Spins ───────────────────────────────────────────────────────────────
 
+// Reduced from 10/15/20 per ape.church team request — cheaper on-chain gas.
 export const FREE_SPINS_AWARD: Record<number, number> = {
-  3: 10,
-  4: 15,
-  5: 20,
+  3: 4,
+  4: 8,
+  5: 12,
 };
-export const FREE_SPINS_RETRIGGER = 5;
+export const FREE_SPINS_RETRIGGER = 4;
 
 // ── Game Object ─────────────────────────────────────────────────────────────
 
