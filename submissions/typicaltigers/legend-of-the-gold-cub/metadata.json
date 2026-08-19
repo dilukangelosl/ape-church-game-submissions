@@ -27,6 +27,6 @@
   "setupComponent": "MyGameSetupCard.tsx",
   "configFile": "myGameConfig.ts",
   "layout": "hud",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "submittedAt": "2026-05-29"
 }
