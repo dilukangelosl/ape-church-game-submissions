@@ -23,6 +23,20 @@ interface MyGameWindowProps {
 
 const REEL_DELAYS = [700, 950, 1200, 1450, 1700];
 
+// Fade a Howler instance out and stop it, restoring its volume for next play.
+function fadeOutHowl(howl: unknown, ms = 250) {
+  const h = howl as {
+    playing?: () => boolean;
+    volume?: (v?: number) => number;
+    fade?: (from: number, to: number, d: number) => void;
+    stop?: () => void;
+  } | null;
+  if (!h?.playing?.()) return;
+  const v = typeof h.volume === 'function' ? h.volume() : 0;
+  h.fade?.(v as number, 0, ms);
+  setTimeout(() => { h.stop?.(); h.volume?.(v as number); }, ms + 20);
+}
+
 const IDLE_SYMBOLS: SymbolId[][] = [
   ['golden_cub',         'gold_apechain_tiger', 'apechain_cowboy'],
   ['camo_cub',           'og_top_hat',          'green_cub'      ],
@@ -53,8 +67,8 @@ export default function MyGameWindow({
 }: MyGameWindowProps) {
   const muteSfx    = false;
   const sfxVolume  = 0.6;
-  const [winSFX]        = useSound('/submissions/legend-of-the-gold-cub/sfx/win.mp3',        { volume: sfxVolume,       soundEnabled: !muteSfx, interrupt: true });
-  const [bigWinSFX]     = useSound('/submissions/legend-of-the-gold-cub/sfx/big-win.mp3',    { volume: sfxVolume,       soundEnabled: !muteSfx, interrupt: true });
+  const [winSFX, { sound: winHowl }]       = useSound('/submissions/legend-of-the-gold-cub/sfx/win.mp3',     { volume: sfxVolume,       soundEnabled: !muteSfx, interrupt: true });
+  const [bigWinSFX, { sound: bigWinHowl }] = useSound('/submissions/legend-of-the-gold-cub/sfx/big-win.mp3', { volume: sfxVolume,       soundEnabled: !muteSfx, interrupt: true });
   const [freeSpinSFX]   = useSound('/submissions/legend-of-the-gold-cub/sfx/free-spins.mp3', { volume: sfxVolume * 0.9, soundEnabled: !muteSfx, interrupt: true });
   const [noWinSFX]      = useSound('/submissions/legend-of-the-gold-cub/sfx/no-win.mp3',     { volume: sfxVolume * 0.55,soundEnabled: !muteSfx, interrupt: true });
   const [spinStartSFX]  = useSound('/submissions/legend-of-the-gold-cub/sfx/spin-start.mp3', { volume: sfxVolume,       soundEnabled: !muteSfx, interrupt: true });
@@ -146,6 +160,11 @@ export default function MyGameWindow({
     if (gameState.phase !== 'WIN_DISPLAY') {
       setWinLevel(null);
       setShowWinDisplay(false);
+      // Don't let win SFX trail behind a closed popup (big-win.mp3 outlasts
+      // the 'big' tier display). Free-spins jingle is left alone — it bridges
+      // into the intro screen by design.
+      fadeOutHowl(winHowl);
+      fadeOutHowl(bigWinHowl);
       return;
     }
 

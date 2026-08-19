@@ -181,8 +181,17 @@ const MyGameInner = () => {
       spinsCompleted: prev.spinsCompleted + 1,
     }));
 
-    // After win display, decide next phase
-    const displayDuration = winResult.totalWin > 0 ? 1800 : 800;
+    // After win display, decide next phase. Duration tracks the win tier so
+    // the popup outlives its counter animation (1800–4000ms in MyGameWindow)
+    // and its SFX (win.mp3 2.5s, big-win.mp3 4.3s) instead of closing at a
+    // flat 1.8s with audio still playing.
+    const totalBet = record.betPerLine * NUM_PAYLINES;
+    const displayDuration =
+      winResult.totalWin >= totalBet * 50 ? 4800 :   // jackpot (counter 4000)
+      winResult.totalWin >= totalBet * 20 ? 3800 :   // mega    (counter 3000)
+      winResult.totalWin >= totalBet * 10 ? 3300 :   // big     (counter 2500)
+      winResult.totalWin > 0              ? 2600 :   // win     (counter 1800)
+                                            800;
 
     phaseTimerRef.current = setTimeout(() => {
       const freeSpin = freeSpinsQueueRef.current;
